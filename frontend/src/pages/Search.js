@@ -72,13 +72,13 @@ const Search = () => {
 
       {loading && <div className="loading">Søker...</div>}
       
-      {!loading && query && (
-        <div className="search-results-header">
-          <p className="page-subtitle">Søk etter: "{query}" - {totalResults} resultater</p>
-        </div>
-      </div>
+      {!loading && query && results && (
+        <>
+          <div className="search-results-header">
+            <p className="page-subtitle">Søkeresultater for: "{query}" - {totalResults} treff</p>
+          </div>
 
-      {results.products.length > 0 && (
+          {results.products && results.products.length > 0 && (
         <div className="search-section">
           <h3>Produkter ({results.products.length})</h3>
           <div className="grid">
