@@ -18,6 +18,7 @@ import Tasks from './pages/Tasks';
 import Expenses from './pages/Expenses';
 import Reports from './pages/Reports';
 import Search from './pages/Search';
+import Settings from './pages/Settings';
 import './App.css';
 
 function App() {
