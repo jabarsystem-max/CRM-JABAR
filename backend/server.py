@@ -443,7 +443,7 @@ async def delete_customer(customer_id: str, current_user: User = Depends(get_cur
 async def get_inventory(current_user: User = Depends(get_current_user)):
     inventory = await db.inventory.find({}, {"_id": 0}).to_list(1000)
     
-    # Enrich with product info
+    # Enrich with product info and update stock status
     for inv in inventory:
         if isinstance(inv.get('last_updated'), str):
             inv['last_updated'] = datetime.fromisoformat(inv['last_updated'])
@@ -454,14 +454,14 @@ async def get_inventory(current_user: User = Depends(get_current_user)):
             inv['product_sku'] = product['sku']
             inv['product_cost'] = product['cost']
             inv['product_color'] = product.get('color')
+            inv['min_quantity'] = product.get('min_stock', 80)
+            inv['stock_status'] = product.get('stock_status', 'OK')
     
     return inventory
 
 @api_router.put("/inventory/{product_id}", response_model=Dict[str, Any])
 async def update_inventory(product_id: str, inventory_update: InventoryUpdate, current_user: User = Depends(get_current_user)):
     update_data = {"quantity": inventory_update.quantity, "last_updated": datetime.now(timezone.utc).isoformat()}
-    if inventory_update.min_quantity is not None:
-        update_data["min_quantity"] = inventory_update.min_quantity
     
     result = await db.inventory.update_one(
         {"product_id": product_id},
@@ -469,6 +469,9 @@ async def update_inventory(product_id: str, inventory_update: InventoryUpdate, c
     )
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Inventory not found")
+    
+    # Update product stock status
+    await update_product_stock_status(product_id, inventory_update.quantity)
     
     updated = await db.inventory.find_one({"product_id": product_id}, {"_id": 0})
     if isinstance(updated.get('last_updated'), str):
