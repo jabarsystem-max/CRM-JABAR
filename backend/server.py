@@ -894,6 +894,14 @@ async def create_product(product_create: ProductCreate, current_user: User = Dep
 
 @api_router.put("/products/{product_id}", response_model=Product)
 async def update_product(product_id: str, product_update: ProductCreate, current_user: User = Depends(get_current_user)):
+    # Check for duplicate SKU (excluding current product)
+    existing = await db.products.find_one({
+        "sku": product_update.sku,
+        "id": {"$ne": product_id}
+    }, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail=f"Product with SKU '{product_update.sku}' already exists")
+    
     result = await db.products.update_one(
         {"id": product_id},
         {"$set": product_update.model_dump()}
