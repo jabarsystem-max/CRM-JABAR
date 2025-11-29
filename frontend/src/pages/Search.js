@@ -138,10 +138,12 @@ const Search = () => {
         </div>
       )}
 
-      {totalResults === 0 && (
-        <div className="no-results">
-          <p>Ingen resultater funnet for "{query}"</p>
-        </div>
+          {totalResults === 0 && (
+            <div className="no-results">
+              <p>Ingen resultater funnet for "{query}"</p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
