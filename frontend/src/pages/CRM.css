@@ -1272,3 +1272,242 @@
   font-weight: 600;
   color: #1e2a32;
 }
+
+/* ============================================================================
+   RESPONSIVE DESIGN - MOBILE & TABLET OPTIMIZATIONS
+   ============================================================================ */
+
+/* Tablet and below (< 1024px) */
+@media (max-width: 1024px) {
+  .crm-page {
+    padding: 15px;
+  }
+  
+  .page-title {
+    font-size: 28px;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+  }
+  
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .settings-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .settings-sidebar {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .settings-tab {
+    white-space: nowrap;
+  }
+  
+  .data-table {
+    font-size: 13px;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 10px 8px;
+  }
+}
+
+/* Mobile (< 768px) */
+@media (max-width: 768px) {
+  .crm-page {
+    padding: 12px;
+  }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .page-title {
+    font-size: 24px;
+  }
+  
+  .page-subtitle {
+    font-size: 13px;
+  }
+  
+  /* Stack stats cards vertically on mobile */
+  .stats-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .stat-card {
+    padding: 15px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+  
+  /* Dashboard grid becomes single column */
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  /* Tables scroll horizontally */
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .data-table {
+    min-width: 800px;
+  }
+  
+  /* Modal adjustments */
+  .modal-content {
+    width: 95%;
+    max-width: 95%;
+    padding: 20px;
+  }
+  
+  .modal-title {
+    font-size: 20px;
+  }
+  
+  /* Form adjustments */
+  .form-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .form-group {
+    width: 100% !important;
+  }
+  
+  /* Button adjustments */
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger {
+    width: 100%;
+    padding: 14px 20px;
+  }
+  
+  .btn-small {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  
+  /* Filter bar */
+  .filter-bar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .filter-btn {
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+  
+  /* Chart adjustments */
+  .bar-chart {
+    height: 150px;
+    gap: 10px;
+  }
+  
+  .bar-wrapper {
+    height: 130px;
+  }
+  
+  /* Card adjustments */
+  .card-item,
+  .dashboard-card {
+    padding: 15px;
+  }
+  
+  .card-title {
+    font-size: 16px;
+  }
+  
+  /* Product/Customer lists */
+  .product-item,
+  .customer-item,
+  .task-item {
+    padding: 10px;
+  }
+  
+  /* Settings page mobile */
+  .settings-sidebar {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  
+  .settings-content {
+    padding: 20px;
+  }
+  
+  .theme-selector,
+  .color-selector {
+    flex-direction: column;
+  }
+  
+  .theme-option,
+  .color-option {
+    width: 100%;
+  }
+}
+
+/* Small mobile (< 480px) */
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 22px;
+  }
+  
+  .stat-value {
+    font-size: 20px;
+  }
+  
+  .dashboard-card h3 {
+    font-size: 16px;
+  }
+  
+  .modal-content {
+    padding: 15px;
+  }
+  
+  .form-input,
+  .form-textarea,
+  .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Landscape mobile optimizations */
+@media (max-height: 600px) and (orientation: landscape) {
+  .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .page-header {
+    margin-bottom: 15px;
+  }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
