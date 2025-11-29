@@ -823,7 +823,7 @@ ZenVit CRM System
 
 @api_router.post("/auth/register", response_model=User, status_code=status.HTTP_201_CREATED)
 async def register(user_create: UserCreate):
-    existing_user = await db.users.find_one({"email": user_create.email})
+    existing_user = await db.users.find_one({"email": user_create.email}, {"_id": 0})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
