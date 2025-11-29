@@ -131,7 +131,7 @@ backend:
 
   - task: "Stock management endpoints"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
@@ -140,6 +140,9 @@ backend:
         - working: false
         - agent: "testing"
         - comment: "❌ CRITICAL: GET /stock works (6 items), PUT /stock/{id} works, but POST /stock/adjust endpoint missing (405 Method Not Allowed). GET /stock/movements returns 405 Method Not Allowed. Stock adjustment functionality incomplete."
+        - working: true
+        - agent: "testing"
+        - comment: "✅ FIXED: All stock management endpoints now working correctly. GET /stock/movements returns stock movements (not 405). POST /stock/adjust working with proper query parameters - supports positive adjustments (+5), negative adjustments (-3), and correctly rejects excessive negative adjustments with 400 Bad Request. Stock adjustment API fully functional with previous_quantity and new_quantity responses."
 
   - task: "Customers CRUD operations"
     implemented: true
