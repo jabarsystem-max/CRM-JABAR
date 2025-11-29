@@ -1326,6 +1326,9 @@ async def create_order(order_create: OrderCreate, current_user: User = Depends(g
     # Create timeline entry
     await create_timeline_entry(customer['id'], "Order", f"New order created: {order.id[:8]} - {order_total:.2f} kr")
     
+    # Send email notification for new order
+    await send_new_order_notification(order.id, customer['name'], order_total)
+    
     return {**order_doc, "lines": lines}
 
 @api_router.put("/orders/{order_id}/status")
