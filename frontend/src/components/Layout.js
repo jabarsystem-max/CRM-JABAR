@@ -9,6 +9,7 @@ const Layout = () => {
   const { logout, user } = useAuth();
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const menuItems = [
     { id: 'dashboard', icon: '🏠', label: 'Dashboard', path: '/dashboard' },
