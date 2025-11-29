@@ -66,6 +66,13 @@ const Layout = () => {
           </button>
           <button
             className="sidebar-btn"
+            title="Innstillinger"
+            onClick={() => navigate('/settings')}
+          >
+            <span>⚙️</span>
+          </button>
+          <button
+            className="sidebar-btn"
             title="Logg ut"
             onClick={handleLogout}
           >
