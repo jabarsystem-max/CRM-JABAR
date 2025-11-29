@@ -839,7 +839,7 @@ async def register(user_create: UserCreate):
 
 @api_router.post("/auth/login", response_model=TokenResponse)
 async def login(user_login: UserLogin):
-    user_data = await db.users.find_one({"email": user_login.email})
+    user_data = await db.users.find_one({"email": user_login.email}, {"_id": 0})
     if not user_data:
         raise HTTPException(status_code=401, detail="Incorrect email or password")
     
