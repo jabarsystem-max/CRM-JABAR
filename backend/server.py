@@ -71,24 +71,29 @@ class TokenResponse(BaseModel):
 # --- Product Models ---
 class Product(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    description: Optional[str] = None
-    category: str  # "vitamin", "supplement", etc.
-    sku: str
-    price: float  # Salgspris
-    cost: float  # Innkjøpspris
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), alias="ProductID")
+    sku: str = Field(alias="SKU")
+    name: str = Field(alias="Name")
+    category: str = Field(alias="Category")  # "vitamin", "supplement", etc.
+    cost: float = Field(alias="CostPrice")  # Innkjøpspris
+    price: float = Field(alias="SalePrice")  # Salgspris
+    min_stock: int = Field(default=80, alias="MinStock")
+    stock_status: Optional[str] = Field(default="OK", alias="StockStatus")  # auto: "OK" | "Low" | "Out"
+    description: Optional[str] = Field(default=None, alias="Description")
+    supplier_id: Optional[str] = Field(default=None, alias="SupplierID")
+    active: bool = Field(default=True, alias="Active")
     color: Optional[str] = None  # For UI styling
-    active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ProductCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-    category: str
     sku: str
-    price: float
+    name: str
+    category: str
     cost: float
+    price: float
+    min_stock: int = 80
+    description: Optional[str] = None
+    supplier_id: Optional[str] = None
     color: Optional[str] = None
 
 
