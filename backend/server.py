@@ -1643,7 +1643,7 @@ async def get_monthly_report(month: Optional[int] = None, year: Optional[int] = 
     # Top products
     product_stats = {}
     for order in orders:
-        lines = await db.order_lines.find({"order_id": order['id']}).to_list(1000)
+        lines = await db.order_lines.find({"order_id": order['id']}, {"_id": 0}).to_list(1000)
         for line in lines:
             pid = line['product_id']
             if pid not in product_stats:
