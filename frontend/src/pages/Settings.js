@@ -161,7 +161,7 @@ const Settings = () => {
                   </button>
                 </div>
                 <p className="settings-note">
-                  ℹ️ Mørkt tema kommer snart! For nå er kun lyst tema tilgjengelig.
+                  ✨ Bytt mellom lyst og mørkt tema for optimal leseopplevelse!
                 </p>
               </div>
 
