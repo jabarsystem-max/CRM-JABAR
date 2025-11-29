@@ -1170,6 +1170,9 @@ async def create_purchase(purchase_create: PurchaseCreate, current_user: User = 
     # Save lines
     await db.purchase_lines.insert_many(lines)
     
+    # Remove MongoDB's _id field if it exists to prevent BSON serialization error
+    purchase_doc.pop('_id', None)
+    
     return {**purchase_doc, "lines": lines}
 
 @api_router.put("/purchases/{purchase_id}/receive", response_model=Dict[str, Any])
