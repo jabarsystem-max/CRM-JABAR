@@ -249,6 +249,42 @@ frontend:
         - agent: "testing"
         - comment: "✅ PASSED: All sidebar navigation buttons work correctly. Successfully navigated between all pages using sidebar icons and returned to dashboard."
 
+  - task: "Backend automation endpoints"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "main"
+        - comment: "Backend automation endpoints implemented: /api/automation/status and /api/automation/check-low-stock. Need testing to verify functionality."
+
+  - task: "Global search functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Search.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "main"
+        - comment: "Global search implemented with search bar in Layout and Search page. Need testing to verify search for products, customers, and tasks."
+
+  - task: "Settings page with 5 tabs"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Settings.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "main"
+        - comment: "Settings page implemented with 5 tabs: Profile, Appearance, Notifications, Automation, Data & Export. Need testing to verify all tabs and functionality."
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
