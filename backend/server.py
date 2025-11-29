@@ -559,9 +559,9 @@ async def delete_product(product_id: str, current_user: User = Depends(get_curre
 # The file continues with STOCK, SUPPLIERS, PURCHASES, CUSTOMERS, ORDERS, TASKS, EXPENSES, DASHBOARD, and REPORTS routes
 
 # ============================================================================
-# Include router and middleware
+# Include router and middleware (moved to end after all routes are defined)
 # ============================================================================
-app.include_router(api_router)
+# app.include_router(api_router)  # Moved to end of file
 
 
 # ============================================================================
