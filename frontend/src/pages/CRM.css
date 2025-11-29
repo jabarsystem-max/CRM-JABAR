@@ -206,6 +206,11 @@
   color: #7c2d12;
 }
 
+.badge-danger {
+  background: #fecaca;
+  color: #991b1b;
+}
+
 /* Table */
 .table-container {
   background: white;
