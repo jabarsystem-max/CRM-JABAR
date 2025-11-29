@@ -1424,6 +1424,77 @@ async def search(q: str, current_user: User = Depends(get_current_user)):
 
 
 # ============================================================================
+# AUTOMATION ROUTES
+# ============================================================================
+
+@api_router.post("/automation/check-low-stock")
+async def run_low_stock_automation(current_user: User = Depends(get_current_user)):
+    """Manually trigger low stock automation check for all products"""
+    stock_items = await db.stock.find({"status": {"$in": ["Low", "Out"]}}, {"_id": 0}).to_list(1000)
+    tasks_created = 0
+    
+    for stock_item in stock_items:
+        await check_and_create_low_stock_task(stock_item['product_id'])
+        # Check if task was created
+        task_exists = await db.tasks.find_one({
+            "product_id": stock_item['product_id'],
+            "type": "Stock",
+            "status": {"$ne": "Done"}
+        })
+        if task_exists:
+            tasks_created += 1
+    
+    return {
+        "message": f"Low stock automation completed",
+        "low_stock_items": len(stock_items),
+        "tasks_created": tasks_created
+    }
+
+@api_router.get("/automation/status")
+async def get_automation_status(current_user: User = Depends(get_current_user)):
+    """Get status of all automation rules"""
+    # Count low stock items
+    low_stock_count = await db.stock.count_documents({"status": {"$in": ["Low", "Out"]}})
+    
+    # Count active stock tasks
+    stock_tasks_count = await db.tasks.count_documents({
+        "type": "Stock",
+        "status": {"$ne": "Done"}
+    })
+    
+    # Count customers needing follow-up (no order in last 60 days)
+    inactive_threshold = (datetime.now(timezone.utc) - timedelta(days=60)).isoformat()
+    customers_needing_followup = await db.customers.count_documents({
+        "last_order_date": {"$lt": inactive_threshold},
+        "status": "Active"
+    })
+    
+    return {
+        "automations": {
+            "low_stock_monitoring": {
+                "enabled": True,
+                "description": "Auto-creates tasks when stock is low or out",
+                "low_stock_items": low_stock_count,
+                "active_tasks": stock_tasks_count
+            },
+            "customer_stats_update": {
+                "enabled": True,
+                "description": "Auto-updates customer stats on order creation"
+            },
+            "task_completion": {
+                "enabled": True,
+                "description": "Auto-completes stock tasks when inventory is replenished"
+            },
+            "customer_follow_up": {
+                "enabled": False,
+                "description": "Identifies customers needing follow-up",
+                "customers_needing_followup": customers_needing_followup
+            }
+        }
+    }
+
+
+# ============================================================================
 # SEED DATA ROUTE
 # ============================================================================
 
