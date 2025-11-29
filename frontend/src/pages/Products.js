@@ -56,6 +56,8 @@ const Products = () => {
         sku: '',
         price: '',
         cost: '',
+        min_stock: 80,
+        supplier_id: '',
         color: 'omega'
       });
       fetchProducts();
