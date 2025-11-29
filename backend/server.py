@@ -1167,8 +1167,9 @@ async def create_purchase(purchase_create: PurchaseCreate, current_user: User = 
     purchase_doc['date'] = purchase_doc['date'].isoformat()
     await db.purchases.insert_one(purchase_doc)
     
-    # Save lines
-    await db.purchase_lines.insert_many(lines)
+    # Save lines (make a copy to avoid modifying the original)
+    lines_to_save = [line.copy() for line in lines]
+    await db.purchase_lines.insert_many(lines_to_save)
     
     # Remove MongoDB's _id field if it exists to prevent BSON serialization error
     purchase_doc.pop('_id', None)
