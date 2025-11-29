@@ -425,7 +425,7 @@ async def update_customer_stats(customer_id: str):
     product_counts = {}
     for order in orders:
         order_id = order['id']
-        lines = await db.order_lines.find({"order_id": order_id}).to_list(1000)
+        lines = await db.order_lines.find({"order_id": order_id}, {"_id": 0}).to_list(1000)
         for line in lines:
             pid = line['product_id']
             product_counts[pid] = product_counts.get(pid, 0) + line['quantity']
@@ -433,7 +433,7 @@ async def update_customer_stats(customer_id: str):
     favorite_product = None
     if product_counts:
         fav_id = max(product_counts, key=product_counts.get)
-        fav_prod = await db.products.find_one({"id": fav_id})
+        fav_prod = await db.products.find_one({"id": fav_id}, {"_id": 0})
         if fav_prod:
             favorite_product = fav_prod['name']
     
