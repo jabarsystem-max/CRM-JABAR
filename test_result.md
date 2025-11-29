@@ -206,7 +206,7 @@ backend:
 
   - task: "Purchases CRUD operations"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
@@ -215,6 +215,9 @@ backend:
         - working: false
         - agent: "testing"
         - comment: "❌ CRITICAL: GET /purchases works (0 purchases), but POST /purchases returns 500 Internal Server Error due to BSON ObjectId serialization issue. Purchase creation failing completely. PUT /purchases/{id}/receive endpoint exists but cannot test due to creation failure."
+        - working: true
+        - agent: "testing"
+        - comment: "✅ FIXED: BSON ObjectId serialization issue resolved. POST /purchases now works correctly (201 Created). Purchase creation successful with proper purchase_id, supplier_name, and total_amount. PUT /purchases/{id}/receive working correctly - status changes to 'Received' and stock increases properly. All purchase functionality now operational."
 
   - task: "Dashboard endpoint"
     implemented: true
