@@ -461,6 +461,82 @@ async def create_timeline_entry(customer_id: str, type: str, description: str):
 
 
 # ============================================================================
+# AUTOMATION FUNCTIONS
+# ============================================================================
+
+async def check_and_create_low_stock_task(product_id: str):
+    """Automation: Create task when stock is low"""
+    stock = await db.stock.find_one({"product_id": product_id}, {"_id": 0})
+    if not stock or stock.get('status') not in ['Low', 'Out']:
+        return
+    
+    product = await db.products.find_one({"id": product_id}, {"_id": 0})
+    if not product:
+        return
+    
+    # Check if task already exists for this product
+    existing_task = await db.tasks.find_one({
+        "product_id": product_id,
+        "type": "Stock",
+        "status": {"$ne": "Done"}
+    })
+    
+    if existing_task:
+        return  # Task already exists
+    
+    # Create new task
+    task_title = f"Bestill mer {product['name']}"
+    task_description = f"Lageret er {stock['status'].lower()} ({stock['quantity']} stk, min: {stock.get('min_stock', 80)} stk)"
+    
+    task = Task(
+        title=task_title,
+        description=task_description,
+        due_date=datetime.now(timezone.utc) + timedelta(days=3),
+        priority="High" if stock['status'] == 'Out' else "Medium",
+        status="Planned",
+        type="Stock",
+        product_id=product_id,
+        assigned_to="Admin"
+    )
+    
+    doc = task.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['due_date'] = doc['due_date'].isoformat()
+    await db.tasks.insert_one(doc)
+
+async def auto_update_customer_on_order(customer_id: str, order_id: str):
+    """Automation: Update customer stats and create timeline entry when order is created"""
+    await update_customer_stats(customer_id)
+    
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if order:
+        await create_timeline_entry(
+            customer_id,
+            "Order",
+            f"Ordre opprettet: {order_id[:8]} - {round(order.get('order_total', 0))} kr"
+        )
+
+async def auto_complete_task_on_stock_replenishment(product_id: str):
+    """Automation: Mark stock tasks as done when stock is replenished"""
+    stock = await db.stock.find_one({"product_id": product_id}, {"_id": 0})
+    if not stock or stock.get('status') != 'OK':
+        return
+    
+    # Find and complete related tasks
+    tasks = await db.tasks.find({
+        "product_id": product_id,
+        "type": "Stock",
+        "status": {"$ne": "Done"}
+    }, {"_id": 0}).to_list(100)
+    
+    for task in tasks:
+        await db.tasks.update_one(
+            {"id": task['id']},
+            {"$set": {"status": "Done"}}
+        )
+
+
+# ============================================================================
 # AUTH ROUTES
 # ============================================================================
 
