@@ -1510,6 +1510,10 @@ async def get_expenses(current_user: User = Depends(get_current_user)):
 
 @api_router.post("/expenses", response_model=Expense, status_code=status.HTTP_201_CREATED)
 async def create_expense(expense_create: ExpenseCreate, current_user: User = Depends(get_current_user)):
+    # Validate amount is positive
+    if expense_create.amount <= 0:
+        raise HTTPException(status_code=400, detail="Expense amount must be greater than 0")
+    
     expense = Expense(**expense_create.model_dump())
     doc = expense.model_dump()
     doc['date'] = doc['date'].isoformat()
