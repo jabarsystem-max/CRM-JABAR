@@ -191,7 +191,7 @@ backend:
 
   - task: "Orders CRUD operations"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
@@ -200,6 +200,9 @@ backend:
         - working: false
         - agent: "testing"
         - comment: "❌ CRITICAL: GET /orders works (0 orders), but POST /orders returns 500 Internal Server Error due to BSON ObjectId serialization issue. Order creation failing completely. PUT /orders/{id}/status endpoint exists but cannot test due to creation failure."
+        - working: true
+        - agent: "testing"
+        - comment: "✅ FIXED: BSON ObjectId serialization issue resolved. POST /orders now works correctly (201 Created). Order creation successful with proper order_id, customer_name, order_total, and profit calculation. Stock reduction working correctly. All order functionality now operational."
 
   - task: "Purchases CRUD operations"
     implemented: true
