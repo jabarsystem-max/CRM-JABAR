@@ -858,6 +858,9 @@ async def receive_purchase(purchase_id: str, current_user: User = Depends(get_cu
         )
         await update_stock_status(line['product_id'])
         await create_stock_movement(line['product_id'], "IN", line['quantity'], purchase_id=purchase_id, note="Purchase received")
+        
+        # AUTOMATION: Complete stock tasks when replenished
+        await auto_complete_task_on_stock_replenishment(line['product_id'])
     
     # Update purchase status
     await db.purchases.update_one(
