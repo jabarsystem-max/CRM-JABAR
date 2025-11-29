@@ -45,7 +45,11 @@ EMAIL_FROM = os.environ.get('EMAIL_FROM', 'noreply@zenvit.no')
 EMAIL_ENABLED = os.environ.get('EMAIL_ENABLED', 'false').lower() == 'true'
 
 # Create the main app
-app = FastAPI(title="ZenVit Complete CRM API")
+app = FastAPI(
+    title="ZenVit Complete CRM API",
+    description="Complete CRM system with products, customers, orders, and automation",
+    version="1.0.0"
+)
 api_router = APIRouter(prefix="/api")
 
 
