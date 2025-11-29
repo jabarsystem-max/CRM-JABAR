@@ -1,0 +1,365 @@
+/* Theme CSS Variables */
+:root {
+  /* Light theme colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --bg-card: #ffffff;
+  
+  --text-primary: #1e2a32;
+  --text-secondary: #7b8794;
+  --text-tertiary: #9ca3af;
+  
+  --border-color: #e5e7eb;
+  --border-light: #f3f4f6;
+  
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+  
+  --accent-primary: #3b82f6;
+  --accent-secondary: #6366f1;
+  
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+  --info: #3b82f6;
+}
+
+/* Dark theme colors */
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-card: #1e293b;
+  
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  
+  --border-color: #334155;
+  --border-light: #475569;
+  
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  
+  --accent-primary: #60a5fa;
+  --accent-secondary: #818cf8;
+  
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --info: #60a5fa;
+}
+
+/* Apply theme to body and main containers */
+body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Sidebar theme */
+.sidebar {
+  background: var(--bg-card) !important;
+  border-right: 1px solid var(--border-color);
+}
+
+.sidebar-logo {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+  color: white !important;
+}
+
+.sidebar-btn {
+  color: var(--text-secondary) !important;
+}
+
+.sidebar-btn:hover {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+.sidebar-btn--active {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+  color: white !important;
+}
+
+/* Main content theme */
+.main-content {
+  background-color: var(--bg-secondary);
+}
+
+/* Page elements */
+.page-title {
+  color: var(--text-primary) !important;
+}
+
+.page-subtitle {
+  color: var(--text-secondary) !important;
+}
+
+/* Cards */
+.card-item, .dashboard-card, .settings-content, .stat-card, 
+.customer-info-card, .timeline-card, .report-card {
+  background: var(--bg-card) !important;
+  box-shadow: var(--shadow-sm) !important;
+  border: 1px solid var(--border-color);
+}
+
+.card-item:hover, .dashboard-card:hover {
+  box-shadow: var(--shadow-md) !important;
+}
+
+.card-title, .card-header h3 {
+  color: var(--text-primary) !important;
+}
+
+.card-text, .card-stats .stat-label {
+  color: var(--text-secondary) !important;
+}
+
+/* Forms and inputs */
+.form-input, .form-textarea, .form-select, .search-input {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: var(--accent-primary) !important;
+  background: var(--bg-primary) !important;
+}
+
+/* Buttons */
+.btn-secondary {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+.btn-secondary:hover {
+  background: var(--border-color) !important;
+}
+
+/* Tables */
+.data-table {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color);
+}
+
+.data-table thead {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.data-table tbody tr:hover {
+  background: var(--bg-tertiary) !important;
+}
+
+.data-table td, .data-table th {
+  color: var(--text-primary) !important;
+}
+
+/* Modals */
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.7) !important;
+}
+
+[data-theme="dark"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.85) !important;
+}
+
+.modal-content {
+  background: var(--bg-card) !important;
+  box-shadow: var(--shadow-md) !important;
+  border: 1px solid var(--border-color);
+}
+
+.modal-title {
+  color: var(--text-primary) !important;
+}
+
+/* Badges */
+.badge {
+  border: 1px solid var(--border-color);
+}
+
+/* Filter bar */
+.filter-bar .filter-btn {
+  background: var(--bg-card) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.filter-bar .filter-btn:hover {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+.filter-bar .filter-btn.active {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+  color: white !important;
+  border-color: transparent !important;
+}
+
+/* Stats row */
+.stats-row .stat-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color);
+}
+
+.stat-value {
+  color: var(--text-primary) !important;
+}
+
+.stat-label {
+  color: var(--text-secondary) !important;
+}
+
+/* Search section */
+.search-section h3 {
+  color: var(--text-primary) !important;
+}
+
+/* Settings page specific */
+.settings-sidebar .settings-tab {
+  background: var(--bg-card) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-color);
+}
+
+.settings-sidebar .settings-tab:hover {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+.settings-section h2, .settings-section h3 {
+  color: var(--text-primary) !important;
+}
+
+.settings-label {
+  color: var(--text-primary) !important;
+}
+
+.settings-description {
+  color: var(--text-secondary) !important;
+}
+
+.theme-option, .color-option {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.theme-option:hover, .color-option:hover {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-light) !important;
+}
+
+.settings-toggle {
+  background: var(--bg-secondary) !important;
+}
+
+.automation-card {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.automation-list li {
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.storage-info {
+  background: var(--bg-secondary) !important;
+}
+
+.storage-label {
+  color: var(--text-secondary) !important;
+}
+
+.storage-value {
+  color: var(--text-primary) !important;
+}
+
+/* Dashboard specific */
+.task-item {
+  background: var(--bg-secondary) !important;
+  border-left-color: var(--accent-primary) !important;
+}
+
+.task-title {
+  color: var(--text-primary) !important;
+}
+
+.task-type {
+  color: var(--text-secondary) !important;
+}
+
+.product-item, .customer-item, .stock-item, .channel-item {
+  background: var(--bg-secondary) !important;
+}
+
+.product-item:hover, .customer-item:hover {
+  background: var(--bg-tertiary) !important;
+}
+
+.product-name, .customer-name, .stock-name, .channel-name {
+  color: var(--text-primary) !important;
+}
+
+/* Timeline */
+.timeline-entry {
+  border-left: 2px solid var(--border-color);
+  color: var(--text-primary) !important;
+}
+
+.timeline-date {
+  color: var(--text-secondary) !important;
+}
+
+/* Empty message */
+.empty-message, .no-results {
+  color: var(--text-secondary) !important;
+}
+
+/* Loading */
+.loading {
+  color: var(--text-secondary) !important;
+}
+
+/* Notes */
+.settings-note {
+  background: var(--bg-tertiary) !important;
+  border-left-color: var(--accent-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Search bar */
+.search-bar {
+  background: var(--bg-card) !important;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Login page specific (remains light) */
+.login-container {
+  background: #ffffff !important;
+}
+
+/* Override for specific dark theme adjustments */
+[data-theme="dark"] .toggle-slider {
+  background-color: var(--border-color);
+}
+
+[data-theme="dark"] .bar-chart {
+  opacity: 0.95;
+}
+
+[data-theme="dark"] code {
+  background: var(--bg-tertiary);
+  color: var(--accent-primary);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
