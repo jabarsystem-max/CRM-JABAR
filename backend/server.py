@@ -1448,6 +1448,11 @@ async def seed_data():
     return {"message": "Complete test data created successfully"}
 
 
+# ============================================================================
+# REGISTER ROUTES - MUST BE AFTER ALL ROUTE DEFINITIONS
+# ============================================================================
+app.include_router(api_router)
+
 
 app.add_middleware(
     CORSMiddleware,
