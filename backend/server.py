@@ -439,11 +439,16 @@ async def update_customer_stats(customer_id: str):
     
     # Determine status based on activity
     status = "Active" if order_count > 0 else "New"
+    last_order_date_str = None
     if order_count >= 10:
         status = "VIP"
     elif last_order_date:
         if isinstance(last_order_date, str):
+            last_order_date_str = last_order_date
             last_order_date = datetime.fromisoformat(last_order_date)
+        else:
+            last_order_date_str = last_order_date.isoformat()
+        
         days_since = (datetime.now(timezone.utc) - last_order_date).days
         if days_since > 90:
             status = "Inactive"
@@ -454,7 +459,7 @@ async def update_customer_stats(customer_id: str):
             "total_value": total_value,
             "order_count": order_count,
             "favorite_product": favorite_product,
-            "last_order_date": last_order_date.isoformat() if last_order_date else None,
+            "last_order_date": last_order_date_str,
             "status": status
         }}
     )
