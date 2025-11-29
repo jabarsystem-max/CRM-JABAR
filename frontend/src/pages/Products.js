@@ -25,10 +25,12 @@ const Products = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`${API_URL}/products`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setProducts(response.data);
+      const [productsRes, suppliersRes] = await Promise.all([
+        axios.get(`${API_URL}/products`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API_URL}/suppliers`, { headers: { Authorization: `Bearer ${token}` } })
+      ]);
+      setProducts(productsRes.data);
+      setSuppliers(suppliersRes.data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching products:', error);
