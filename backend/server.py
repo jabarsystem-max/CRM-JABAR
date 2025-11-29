@@ -858,6 +858,31 @@ async def seed_data():
     await db.purchases.delete_many({})
     await db.costs.delete_many({})
     
+    # Create suppliers first
+    suppliers = [
+        {
+            "id": str(uuid.uuid4()),
+            "name": "Nordic Supplements AS",
+            "contact_person": "Per Olsen",
+            "email": "ordre@nordicsupplements.no",
+            "phone": "22334455",
+            "address": "Industriveien 10, 0581 Oslo",
+            "products_supplied": [],
+            "created_at": datetime.now(timezone.utc).isoformat()
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "name": "VitaImport Norge",
+            "contact_person": "Anne Berg",
+            "email": "salg@vitaimport.no",
+            "phone": "55667788",
+            "address": "Havnepromenaden 3, 5013 Bergen",
+            "products_supplied": [],
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+    ]
+    await db.suppliers.insert_many(suppliers)
+    
     # Create products
     products = [
         {
@@ -868,6 +893,9 @@ async def seed_data():
             "sku": "ZV-D3K2-001",
             "price": 299.0,
             "cost": 89.0,
+            "min_stock": 100,
+            "stock_status": "OK",
+            "supplier_id": suppliers[0]['id'],
             "color": "d3",
             "active": True,
             "created_at": datetime.now(timezone.utc).isoformat()
@@ -880,6 +908,9 @@ async def seed_data():
             "sku": "ZV-OM3-001",
             "price": 349.0,
             "cost": 95.0,
+            "min_stock": 150,
+            "stock_status": "OK",
+            "supplier_id": suppliers[0]['id'],
             "color": "omega",
             "active": True,
             "created_at": datetime.now(timezone.utc).isoformat()
