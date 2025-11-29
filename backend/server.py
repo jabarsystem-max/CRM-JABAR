@@ -1039,6 +1039,11 @@ async def get_stock_movements(product_id: Optional[str] = None, current_user: Us
     
     return movements
 
+@api_router.get("/stock/movements", response_model=List[Dict[str, Any]])
+async def get_stock_movements_alt(product_id: Optional[str] = None, current_user: User = Depends(get_current_user)):
+    """Alias endpoint for stock movements (for consistency with /stock/adjust)"""
+    return await get_stock_movements(product_id, current_user)
+
 @api_router.post("/stock-movements", response_model=StockMovement, status_code=status.HTTP_201_CREATED)
 async def create_movement(movement_create: StockMovementCreate, current_user: User = Depends(get_current_user)):
     await create_stock_movement(
