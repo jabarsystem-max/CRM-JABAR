@@ -292,18 +292,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Login functionality"
-    - "Dashboard with KPIs and widgets"
-    - "Products page"
-    - "Stock/Inventory page"
-    - "Customers page"
-    - "Tasks page"
-    - "Suppliers page"
-    - "Expenses page"
-    - "Reports page"
-    - "Navigation functionality"
+    - "Backend automation endpoints"
+    - "Global search functionality"
+    - "Settings page with 5 tabs"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
