@@ -548,6 +548,273 @@ async def auto_complete_task_on_stock_replenishment(product_id: str):
 
 
 # ============================================================================
+# EMAIL NOTIFICATION FUNCTIONS
+# ============================================================================
+
+async def send_email(to_email: str, subject: str, body: str, html_body: str = None):
+    """Send email notification"""
+    if not EMAIL_ENABLED or not SMTP_USER or not SMTP_PASSWORD:
+        logging.info(f"Email disabled or not configured. Would send: {subject} to {to_email}")
+        return False
+    
+    try:
+        message = MIMEMultipart('alternative')
+        message['From'] = EMAIL_FROM
+        message['To'] = to_email
+        message['Subject'] = subject
+        
+        # Add plain text version
+        text_part = MIMEText(body, 'plain', 'utf-8')
+        message.attach(text_part)
+        
+        # Add HTML version if provided
+        if html_body:
+            html_part = MIMEText(html_body, 'html', 'utf-8')
+            message.attach(html_part)
+        
+        # Send email
+        await aiosmtplib.send(
+            message,
+            hostname=SMTP_HOST,
+            port=SMTP_PORT,
+            username=SMTP_USER,
+            password=SMTP_PASSWORD,
+            start_tls=True
+        )
+        logging.info(f"Email sent successfully to {to_email}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to send email to {to_email}: {str(e)}")
+        return False
+
+async def send_low_stock_notification(product_name: str, quantity: int, min_stock: int, admin_email: str = "admin@zenvit.no"):
+    """Send notification when stock is low"""
+    subject = f"⚠️ Lavt lagernivå: {product_name}"
+    
+    body = f"""
+Hei,
+
+Lagernivået for {product_name} er lavt.
+
+Detaljer:
+- Produkt: {product_name}
+- Nåværende beholdning: {quantity} stk
+- Minimum beholdning: {min_stock} stk
+- Status: {'Tomt lager' if quantity == 0 else 'Lavt lager'}
+
+Vennligst bestill mer fra leverandør så snart som mulig.
+
+Med vennlig hilsen,
+ZenVit CRM System
+    """
+    
+    html_body = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; padding: 20px; border-radius: 8px; }}
+        .content {{ background: #f9fafb; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #dc2626; }}
+        .details {{ background: white; padding: 15px; margin: 15px 0; border-radius: 8px; }}
+        .detail-row {{ display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }}
+        .label {{ font-weight: 600; color: #7b8794; }}
+        .value {{ color: #1e2a32; }}
+        .footer {{ text-align: center; color: #7b8794; font-size: 12px; margin-top: 20px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>⚠️ Varsel: Lavt lagernivå</h2>
+        </div>
+        <div class="content">
+            <p>Hei,</p>
+            <p>Lagernivået for <strong>{product_name}</strong> er lavt og krever handling.</p>
+            
+            <div class="details">
+                <div class="detail-row">
+                    <span class="label">Produkt:</span>
+                    <span class="value">{product_name}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Nåværende beholdning:</span>
+                    <span class="value" style="color: #dc2626; font-weight: 600;">{quantity} stk</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Minimum beholdning:</span>
+                    <span class="value">{min_stock} stk</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Status:</span>
+                    <span class="value" style="color: #dc2626; font-weight: 600;">{'🚫 Tomt lager' if quantity == 0 else '⚠️ Lavt lager'}</span>
+                </div>
+            </div>
+            
+            <p>Vennligst bestill mer fra leverandør så snart som mulig.</p>
+        </div>
+        <div class="footer">
+            <p>Dette er en automatisk e-post fra ZenVit CRM System</p>
+        </div>
+    </div>
+</body>
+</html>
+    """
+    
+    await send_email(admin_email, subject, body, html_body)
+
+async def send_new_order_notification(order_id: str, customer_name: str, total: float, admin_email: str = "admin@zenvit.no"):
+    """Send notification when new order is created"""
+    subject = f"🛒 Ny ordre mottatt: {order_id[:8]}"
+    
+    body = f"""
+Hei,
+
+En ny ordre har blitt opprettet i systemet.
+
+Detaljer:
+- Ordre-ID: {order_id}
+- Kunde: {customer_name}
+- Totalt: {round(total)} kr
+- Dato: {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M')}
+
+Logg inn på CRM-systemet for mer informasjon.
+
+Med vennlig hilsen,
+ZenVit CRM System
+    """
+    
+    html_body = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px; border-radius: 8px; }}
+        .content {{ background: #f9fafb; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #10b981; }}
+        .details {{ background: white; padding: 15px; margin: 15px 0; border-radius: 8px; }}
+        .detail-row {{ display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }}
+        .label {{ font-weight: 600; color: #7b8794; }}
+        .value {{ color: #1e2a32; }}
+        .footer {{ text-align: center; color: #7b8794; font-size: 12px; margin-top: 20px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>🛒 Ny ordre mottatt</h2>
+        </div>
+        <div class="content">
+            <p>Hei,</p>
+            <p>En ny ordre har blitt opprettet i systemet.</p>
+            
+            <div class="details">
+                <div class="detail-row">
+                    <span class="label">Ordre-ID:</span>
+                    <span class="value">{order_id}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Kunde:</span>
+                    <span class="value">{customer_name}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Totalt:</span>
+                    <span class="value" style="color: #10b981; font-weight: 600;">{round(total)} kr</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Dato:</span>
+                    <span class="value">{datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M')}</span>
+                </div>
+            </div>
+            
+            <p>Logg inn på CRM-systemet for å se fullstendige ordredetaljer.</p>
+        </div>
+        <div class="footer">
+            <p>Dette er en automatisk e-post fra ZenVit CRM System</p>
+        </div>
+    </div>
+</body>
+</html>
+    """
+    
+    await send_email(admin_email, subject, body, html_body)
+
+async def send_task_deadline_notification(task_title: str, due_date: str, priority: str, admin_email: str = "admin@zenvit.no"):
+    """Send notification for upcoming task deadline"""
+    subject = f"⏰ Oppgavefrist: {task_title}"
+    
+    body = f"""
+Hei,
+
+Du har en oppgave som nærmer seg fristen.
+
+Detaljer:
+- Oppgave: {task_title}
+- Frist: {due_date}
+- Prioritet: {priority}
+
+Vennligst fullfør oppgaven så snart som mulig.
+
+Med vennlig hilsen,
+ZenVit CRM System
+    """
+    
+    html_body = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 20px; border-radius: 8px; }}
+        .content {{ background: #f9fafb; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #f59e0b; }}
+        .details {{ background: white; padding: 15px; margin: 15px 0; border-radius: 8px; }}
+        .detail-row {{ display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }}
+        .label {{ font-weight: 600; color: #7b8794; }}
+        .value {{ color: #1e2a32; }}
+        .footer {{ text-align: center; color: #7b8794; font-size: 12px; margin-top: 20px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>⏰ Påminnelse: Oppgavefrist</h2>
+        </div>
+        <div class="content">
+            <p>Hei,</p>
+            <p>Du har en oppgave som nærmer seg fristen.</p>
+            
+            <div class="details">
+                <div class="detail-row">
+                    <span class="label">Oppgave:</span>
+                    <span class="value">{task_title}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Frist:</span>
+                    <span class="value" style="color: #f59e0b; font-weight: 600;">{due_date}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Prioritet:</span>
+                    <span class="value">{priority}</span>
+                </div>
+            </div>
+            
+            <p>Vennligst fullfør oppgaven så snart som mulig.</p>
+        </div>
+        <div class="footer">
+            <p>Dette er en automatisk e-post fra ZenVit CRM System</p>
+        </div>
+    </div>
+</body>
+</html>
+    """
+    
+    await send_email(admin_email, subject, body, html_body)
+
+
+# ============================================================================
 # AUTH ROUTES
 # ============================================================================
 
