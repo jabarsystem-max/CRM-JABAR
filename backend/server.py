@@ -663,10 +663,14 @@ async def receive_purchase(purchase_id: str, current_user: User = Depends(get_cu
     
     # Update inventory for all items
     for item in purchase['items']:
-        await db.inventory.update_one(
+        inv_result = await db.inventory.find_one_and_update(
             {"product_id": item['product_id']},
-            {"$inc": {"quantity": item['quantity']}, "$set": {"last_updated": datetime.now(timezone.utc).isoformat()}}
+            {"$inc": {"quantity": item['quantity']}, "$set": {"last_updated": datetime.now(timezone.utc).isoformat()}},
+            return_document=True
         )
+        if inv_result:
+            # Update product stock status
+            await update_product_stock_status(item['product_id'], inv_result['quantity'])
     
     # Update purchase status
     await db.purchases.update_one(
