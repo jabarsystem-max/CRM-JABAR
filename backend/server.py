@@ -827,6 +827,50 @@ ZenVit CRM System
 
 
 # ============================================================================
+# HEALTH CHECK & SYSTEM STATUS
+# ============================================================================
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring"""
+    try:
+        # Check database connection
+        await db.command('ping')
+        db_status = "healthy"
+    except Exception as e:
+        db_status = f"unhealthy: {str(e)}"
+    
+    return {
+        "status": "healthy" if db_status == "healthy" else "degraded",
+        "version": "1.0.0",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "services": {
+            "api": "healthy",
+            "database": db_status,
+            "email": "configured" if EMAIL_ENABLED else "disabled"
+        }
+    }
+
+@api_router.get("/system/stats")
+async def system_stats(current_user: User = Depends(get_current_user)):
+    """Get system statistics for admin"""
+    stats = {
+        "users": await db.users.count_documents({}),
+        "products": await db.products.count_documents({}),
+        "customers": await db.customers.count_documents({}),
+        "orders": await db.orders.count_documents({}),
+        "tasks": await db.tasks.count_documents({}),
+        "purchases": await db.purchases.count_documents({}),
+        "expenses": await db.expenses.count_documents({}),
+        "stock_items": await db.stock.count_documents({}),
+        "low_stock": await db.stock.count_documents({"status": {"$in": ["Low", "Out"]}}),
+        "database_name": os.environ.get('DB_NAME', 'unknown'),
+        "version": "1.0.0"
+    }
+    return stats
+
+
+# ============================================================================
 # AUTH ROUTES
 # ============================================================================
 
