@@ -375,14 +375,10 @@ class CriticalFixesTester:
         initial_stock = self.get_product_stock(product_id)
         print(f"Initial stock for {product_name}: {initial_stock}")
         
-        # Test positive adjustment (+5)
-        adjustment_data = {
-            "product_id": product_id,
-            "adjustment": 5,
-            "note": "Test adjustment"
-        }
+        # Test positive adjustment (+5) - using query parameters
+        endpoint = f"/stock/adjust?product_id={product_id}&adjustment=5&note=Test adjustment"
         
-        success, response = self.make_request("POST", "/stock/adjust", adjustment_data)
+        success, response = self.make_request("POST", endpoint)
         
         if isinstance(response, str):
             self.log_test("Stock Adjustment POST", False, f"Request failed: {response}")
