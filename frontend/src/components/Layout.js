@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Layout.css';
@@ -6,22 +6,35 @@ import './Layout.css';
 const Layout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const menuItems = [
     { id: 'dashboard', icon: '🏠', label: 'Dashboard', path: '/dashboard' },
     { id: 'products', icon: '💊', label: 'Produkter', path: '/products' },
-    { id: 'inventory', icon: '📦', label: 'Lager', path: '/inventory' },
+    { id: 'stock', icon: '📦', label: 'Lager', path: '/stock' },
+    { id: 'orders', icon: '🛒', label: 'Ordrer', path: '/orders' },
+    { id: 'customers', icon: '👥', label: 'Kunder', path: '/customers' },
     { id: 'purchases', icon: '📥', label: 'Innkjøp', path: '/purchases' },
     { id: 'suppliers', icon: '🤝', label: 'Leverandører', path: '/suppliers' },
-    { id: 'customers', icon: '👥', label: 'Kunder', path: '/customers' },
-    { id: 'orders', icon: '📊', label: 'Ordrer', path: '/orders' },
-    { id: 'costs', icon: '💸', label: 'Kostnader', path: '/costs' },
+    { id: 'tasks', icon: '✓', label: 'Oppgaver', path: '/tasks' },
+    { id: 'expenses', icon: '💸', label: 'Utgifter', path: '/expenses' },
+    { id: 'reports', icon: '📊', label: 'Rapporter', path: '/reports' },
   ];
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setShowSearch(false);
+      setSearchQuery('');
+    }
   };
 
   return (
@@ -46,6 +59,13 @@ const Layout = () => {
         <div className="sidebar-settings">
           <button
             className="sidebar-btn"
+            title="Søk"
+            onClick={() => setShowSearch(!showSearch)}
+          >
+            <span>🔍</span>
+          </button>
+          <button
+            className="sidebar-btn"
             title="Logg ut"
             onClick={handleLogout}
           >
@@ -55,6 +75,20 @@ const Layout = () => {
       </aside>
       
       <main className="main-content">
+        {showSearch && (
+          <div className="search-bar">
+            <form onSubmit={handleSearch}>
+              <input
+                type="text"
+                placeholder="Søk i produkter, kunder, ordrer..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                autoFocus
+                className="search-input"
+              />
+            </form>
+          </div>
+        )}
         <Outlet />
       </main>
     </div>
