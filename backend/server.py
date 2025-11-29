@@ -974,6 +974,51 @@ async def update_stock(product_id: str, stock_update: StockUpdate, current_user:
     
     return updated
 
+@api_router.post("/stock/adjust")
+async def adjust_stock(product_id: str, adjustment: int, note: str = "Manual adjustment", current_user: User = Depends(get_current_user)):
+    """Adjust stock quantity by a positive or negative amount"""
+    # Get current stock
+    stock = await db.stock.find_one({"product_id": product_id}, {"_id": 0})
+    if not stock:
+        raise HTTPException(status_code=404, detail="Stock not found")
+    
+    # Calculate new quantity
+    current_qty = stock['quantity']
+    new_qty = current_qty + adjustment
+    
+    if new_qty < 0:
+        raise HTTPException(status_code=400, detail="Adjustment would result in negative stock")
+    
+    # Update stock
+    await db.stock.update_one(
+        {"product_id": product_id},
+        {"$inc": {"quantity": adjustment}, "$set": {"last_updated": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Update status
+    await update_stock_status(product_id)
+    
+    # Create stock movement
+    movement_type = "IN" if adjustment > 0 else "OUT"
+    await create_stock_movement(product_id, movement_type, abs(adjustment), note=note)
+    
+    # Get updated stock
+    updated = await db.stock.find_one({"product_id": product_id}, {"_id": 0})
+    if isinstance(updated.get('last_updated'), str):
+        updated['last_updated'] = datetime.fromisoformat(updated['last_updated'])
+    
+    product = await db.products.find_one({"id": product_id}, {"_id": 0})
+    if product:
+        updated['product_name'] = product['name']
+        updated['product_sku'] = product['sku']
+    
+    return {
+        "message": f"Stock adjusted by {adjustment:+d}",
+        "previous_quantity": current_qty,
+        "new_quantity": new_qty,
+        "stock": updated
+    }
+
 
 # ============================================================================
 # STOCK MOVEMENTS ROUTES
