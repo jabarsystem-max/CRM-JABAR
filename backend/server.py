@@ -923,6 +923,9 @@ async def seed_data():
             "sku": "ZV-MAG-001",
             "price": 249.0,
             "cost": 72.0,
+            "min_stock": 120,
+            "stock_status": "OK",
+            "supplier_id": suppliers[1]['id'],
             "color": "mag",
             "active": True,
             "created_at": datetime.now(timezone.utc).isoformat()
@@ -935,6 +938,9 @@ async def seed_data():
             "sku": "ZV-Cznc-001",
             "price": 199.0,
             "cost": 58.0,
+            "min_stock": 100,
+            "stock_status": "OK",
+            "supplier_id": suppliers[1]['id'],
             "color": "csink",
             "active": True,
             "created_at": datetime.now(timezone.utc).isoformat()
@@ -943,12 +949,22 @@ async def seed_data():
     
     await db.products.insert_many(products)
     
+    # Update suppliers with product IDs
+    await db.suppliers.update_one(
+        {"id": suppliers[0]['id']},
+        {"$set": {"products_supplied": [products[0]['id'], products[1]['id']]}}
+    )
+    await db.suppliers.update_one(
+        {"id": suppliers[1]['id']},
+        {"$set": {"products_supplied": [products[2]['id'], products[3]['id']]}}
+    )
+    
     # Create inventory
     inventory = [
-        {"id": str(uuid.uuid4()), "product_id": products[0]['id'], "quantity": 312, "min_quantity": 100, "last_updated": datetime.now(timezone.utc).isoformat()},
-        {"id": str(uuid.uuid4()), "product_id": products[1]['id'], "quantity": 284, "min_quantity": 150, "last_updated": datetime.now(timezone.utc).isoformat()},
-        {"id": str(uuid.uuid4()), "product_id": products[2]['id'], "quantity": 215, "min_quantity": 120, "last_updated": datetime.now(timezone.utc).isoformat()},
-        {"id": str(uuid.uuid4()), "product_id": products[3]['id'], "quantity": 198, "min_quantity": 100, "last_updated": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "product_id": products[0]['id'], "quantity": 312, "last_updated": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "product_id": products[1]['id'], "quantity": 284, "last_updated": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "product_id": products[2]['id'], "quantity": 215, "last_updated": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "product_id": products[3]['id'], "quantity": 198, "last_updated": datetime.now(timezone.utc).isoformat()},
     ]
     
     await db.inventory.insert_many(inventory)
