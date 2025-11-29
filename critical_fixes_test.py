@@ -496,14 +496,10 @@ class CriticalFixesTester:
         current_stock = self.get_product_stock(product_id)
         print(f"Current stock for {product_name}: {current_stock}")
         
-        # Test excessive negative adjustment (-999999)
-        adjustment_data = {
-            "product_id": product_id,
-            "adjustment": -999999,
-            "note": "Test excessive negative adjustment"
-        }
+        # Test excessive negative adjustment (-999999) - using query parameters
+        endpoint = f"/stock/adjust?product_id={product_id}&adjustment=-999999&note=Test excessive negative adjustment"
         
-        success, response = self.make_request("POST", "/stock/adjust", adjustment_data, 400)
+        success, response = self.make_request("POST", endpoint, expected_status=400)
         
         if isinstance(response, str):
             self.log_test("Excessive Negative Adjustment", False, f"Request failed: {response}")
