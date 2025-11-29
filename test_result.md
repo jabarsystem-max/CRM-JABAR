@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test fullstendig ZenVit CRM frontend-applikasjon med login, dashboard, produkter, lager, kunder, oppgaver, ordrer, innkjøp, leverandører, utgifter, rapporter og navigasjon"
+user_problem_statement: "Test de tre nye funksjonene i ZenVit CRM: Backend-automatiseringer, Global søk, og Innstillingsside"
 
 frontend:
   - task: "Login functionality"
