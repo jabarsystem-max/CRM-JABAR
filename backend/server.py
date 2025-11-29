@@ -1370,8 +1370,9 @@ async def create_order(order_create: OrderCreate, current_user: User = Depends(g
         order_doc['payment_date'] = order_doc['payment_date'].isoformat()
     await db.orders.insert_one(order_doc)
     
-    # Save lines
-    await db.order_lines.insert_many(lines)
+    # Save lines (make a copy to avoid modifying the original)
+    lines_to_save = [line.copy() for line in lines]
+    await db.order_lines.insert_many(lines_to_save)
     
     # Update customer stats
     await update_customer_stats(customer['id'])
