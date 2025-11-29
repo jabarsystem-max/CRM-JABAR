@@ -1010,6 +1010,9 @@ async def create_order(order_create: OrderCreate, current_user: User = Depends(g
         )
         await update_stock_status(product['id'])
         await create_stock_movement(product['id'], "OUT", quantity, order_id=order.id, note="Order created")
+        
+        # AUTOMATION: Check if stock is low and create task
+        await check_and_create_low_stock_task(product['id'])
     
     # Calculate profit
     order_total += order.shipping_paid_by_customer
