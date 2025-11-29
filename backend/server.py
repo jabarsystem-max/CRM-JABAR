@@ -410,7 +410,7 @@ async def update_customer_stats(customer_id: str):
     orders = await db.orders.find({
         "customer_id": customer_id,
         "status": {"$in": ["Delivered", "Shipped", "Processing", "Packed"]}
-    }).to_list(1000)
+    }, {"_id": 0}).to_list(1000)
     
     total_value = sum(order.get('order_total', 0) for order in orders)
     order_count = len(orders)
