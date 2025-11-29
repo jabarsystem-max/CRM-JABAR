@@ -453,16 +453,18 @@ frontend:
 
 metadata:
   created_by: "testing_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "2.0"
+  test_sequence: 2
 
 test_plan:
   current_focus:
-    - "Backend automation endpoints"
-    - "Global search functionality"
-    - "Settings page with 5 tabs"
-  stuck_tasks: []
-  test_all: false
+    - "Orders CRUD operations"
+    - "Purchases CRUD operations"
+    - "Stock management endpoints"
+  stuck_tasks:
+    - "Orders CRUD operations"
+    - "Purchases CRUD operations"
+  test_all: true
   test_priority: "high_first"
 
 agent_communication:
@@ -474,3 +476,5 @@ agent_communication:
     - message: "NEW FEATURES TESTING COMPLETE ✅ - All three new features tested successfully: 1) Backend automation endpoints working (status 200, low stock monitoring active), 2) Global search fully functional (magnesium/ola searches work, clickable results navigate correctly), 3) Settings page complete with all 5 tabs and functionality. Only minor issue: Profile tab user info display could be improved."
     - agent: "testing"
     - message: "COMPREHENSIVE END-TO-END TESTING COMPLETE ✅ - Full system test completed covering all requested scenarios: 1) Login with admin@zenvit.no/admin123 ✅, 2) Dashboard KPIs and navigation ✅, 3) All pages load correctly ✅, 4) Dark/Light theme switching working ✅, 5) Accent color changes (Blue/Green/Purple) working ✅, 6) Global search functional (magnesium, ola, vitamin searches) ✅, 7) Automation settings showing 4 active + 4 planned rules ✅, 8) Notification toggles (3 switches) working ✅, 9) Data & Export functionality working ✅, 10) Responsive design tested ✅. All major functionalities verified successfully. System is production-ready."
+    - agent: "testing"
+    - message: "COMPREHENSIVE BACKEND API TESTING COMPLETE - Tested all 13 backend endpoint groups with 44 individual test cases. SUCCESS RATE: 86.4% (38/44 passed). ✅ WORKING: Auth (login/JWT), Products CRUD, Customers CRUD, Suppliers CRUD, Tasks CRUD, Expenses CRUD, Dashboard, Reports, Search, Automation endpoints. ❌ CRITICAL FAILURES: Orders creation (500 error - BSON ObjectId serialization), Purchases creation (500 error - BSON ObjectId serialization), Stock adjustment endpoint missing (405 error). Root cause: MongoDB ObjectId serialization issue in order/purchase creation. Requires immediate fix for production readiness."
