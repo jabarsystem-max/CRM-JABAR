@@ -430,6 +430,18 @@ frontend:
         - agent: "testing"
         - comment: "✅ PASSED: Both automation endpoints working correctly. /api/automation/status returns status 200 with automation data showing 1 low stock item and 1 active task. /api/automation/check-low-stock endpoint working with status 200, successfully triggering low stock automation."
 
+  - task: "High priority validation fixes (SKU, Email, Negative amounts)"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+        - agent: "testing"
+        - comment: "✅ PASSED: All 4 high priority validation fixes verified working correctly: 1) Duplicate SKU validation - POST /products with existing SKU returns 400 'Product with SKU already exists', 2) Duplicate email validation - POST /auth/register with existing email returns 400 'Email already registered', 3) Negative amount validation - POST /expenses with negative/zero amounts returns 400 'Expense amount must be greater than 0', 4) Existing functionality still works - GET /products, GET /customers, POST /orders, GET /dashboard all operational. Stock management also tested: GET /stock/movements (18 movements), POST /stock/adjust (+5/-3 adjustments work, excessive negative rejected). SUCCESS: 15/15 validation tests passed (100%)."
+
   - task: "Global search functionality"
     implemented: true
     working: true
