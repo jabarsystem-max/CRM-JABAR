@@ -36,6 +36,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 hours
 # Security
 security = HTTPBearer()
 
+# Email settings
+SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
+SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
+SMTP_USER = os.environ.get('SMTP_USER', '')
+SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
+EMAIL_FROM = os.environ.get('EMAIL_FROM', 'noreply@zenvit.no')
+EMAIL_ENABLED = os.environ.get('EMAIL_ENABLED', 'false').lower() == 'true'
+
 # Create the main app
 app = FastAPI(title="ZenVit Complete CRM API")
 api_router = APIRouter(prefix="/api")
