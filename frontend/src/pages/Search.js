@@ -8,11 +8,12 @@ const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 
 const Search = () => {
   const { token } = useAuth();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const query = searchParams.get('q');
   const [results, setResults] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState(query || '');
 
   useEffect(() => {
     const performSearch = async () => {
@@ -21,6 +22,7 @@ const Search = () => {
         return;
       }
 
+      setLoading(true);
       try {
         const response = await axios.get(`${API_URL}/search?q=${encodeURIComponent(query)}`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -36,17 +38,42 @@ const Search = () => {
     performSearch();
   }, [query, token]);
 
-  if (loading) return <div className="loading">Søker...</div>;
-  if (!query) return <div className="crm-page"><h2>Ingen søkeord angitt</h2></div>;
-  if (!results) return <div className="loading">Feil ved søk</div>;
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchInput.trim()) {
+      setSearchParams({ q: searchInput.trim() });
+    }
+  };
 
-  const totalResults = Object.values(results).reduce((sum, arr) => sum + arr.length, 0);
+  const totalResults = results ? Object.values(results).reduce((sum, arr) => sum + arr.length, 0) : 0;
 
   return (
     <div className="crm-page">
       <div className="page-header">
         <div>
-          <h1 className="page-title">🔍 Søkeresultater</h1>
+          <h1 className="page-title">🔍 Søk</h1>
+          <p className="page-subtitle">Søk på tvers av produkter, kunder, ordrer og oppgaver</p>
+        </div>
+      </div>
+
+      {/* Search Input */}
+      <form onSubmit={handleSearch} className="search-form">
+        <input
+          type="text"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder="Søk etter produkter, kunder, ordrer..."
+          className="search-input-large"
+        />
+        <button type="submit" className="btn-primary">
+          🔍 Søk
+        </button>
+      </form>
+
+      {loading && <div className="loading">Søker...</div>}
+      
+      {!loading && query && (
+        <div className="search-results-header">
           <p className="page-subtitle">Søk etter: "{query}" - {totalResults} resultater</p>
         </div>
       </div>
