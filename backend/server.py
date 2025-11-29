@@ -71,17 +71,17 @@ class TokenResponse(BaseModel):
 # --- Product Models ---
 class Product(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), alias="ProductID")
-    sku: str = Field(alias="SKU")
-    name: str = Field(alias="Name")
-    category: str = Field(alias="Category")  # "vitamin", "supplement", etc.
-    cost: float = Field(alias="CostPrice")  # Innkjøpspris
-    price: float = Field(alias="SalePrice")  # Salgspris
-    min_stock: int = Field(default=80, alias="MinStock")
-    stock_status: Optional[str] = Field(default="OK", alias="StockStatus")  # auto: "OK" | "Low" | "Out"
-    description: Optional[str] = Field(default=None, alias="Description")
-    supplier_id: Optional[str] = Field(default=None, alias="SupplierID")
-    active: bool = Field(default=True, alias="Active")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))  # ProductID
+    sku: str  # SKU
+    name: str  # Name
+    category: str  # Category - "vitamin", "supplement", etc.
+    cost: float  # CostPrice - Innkjøpspris
+    price: float  # SalePrice - Salgspris
+    min_stock: int = 80  # MinStock
+    stock_status: Optional[str] = "OK"  # StockStatus - auto: "OK" | "Low" | "Out"
+    description: Optional[str] = None  # Description
+    supplier_id: Optional[str] = None  # SupplierID
+    active: bool = True  # Active
     color: Optional[str] = None  # For UI styling
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
