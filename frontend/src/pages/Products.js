@@ -104,6 +104,16 @@ const Products = () => {
                 <span className="stat-label">Innkjøpspris</span>
                 <span className="stat-value">{product.cost} kr</span>
               </div>
+              <div className="stat">
+                <span className="stat-label">Min. lager</span>
+                <span className="stat-value">{product.min_stock || 80} stk</span>
+              </div>
+              <div className="stat">
+                <span className="stat-label">Status</span>
+                <span className={`badge badge-${product.stock_status === 'OK' ? 'success' : product.stock_status === 'Low' ? 'warning' : 'danger'}`}>
+                  {product.stock_status || 'OK'}
+                </span>
+              </div>
             </div>
           </div>
         ))}
