@@ -20,6 +20,7 @@ import Reports from './pages/Reports';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
 import './App.css';
+import './theme.css';
 
 function App() {
   return (
