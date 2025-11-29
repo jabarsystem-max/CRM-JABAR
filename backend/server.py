@@ -1610,7 +1610,7 @@ async def get_daily_report(date: Optional[str] = None, current_user: User = Depe
     orders_today = len(orders)
     
     # Low stock
-    low_stock = await db.stock.find({"status": {"$in": ["Low", "Out"]}}).to_list(1000)
+    low_stock = await db.stock.find({"status": {"$in": ["Low", "Out"]}}, {"_id": 0}).to_list(1000)
     
     return {
         "date": target_date.strftime("%Y-%m-%d"),
