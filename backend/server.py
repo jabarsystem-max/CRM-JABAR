@@ -514,6 +514,9 @@ async def check_and_create_low_stock_task(product_id: str):
     doc['created_at'] = doc['created_at'].isoformat()
     doc['due_date'] = doc['due_date'].isoformat()
     await db.tasks.insert_one(doc)
+    
+    # Send email notification
+    await send_low_stock_notification(product['name'], stock['quantity'], stock.get('min_stock', 80))
 
 async def auto_update_customer_on_order(customer_id: str, order_id: str):
     """Automation: Update customer stats and create timeline entry when order is created"""
