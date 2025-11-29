@@ -563,6 +563,892 @@ async def delete_product(product_id: str, current_user: User = Depends(get_curre
 # ============================================================================
 app.include_router(api_router)
 
+
+# ============================================================================
+# STOCK ROUTES
+# ============================================================================
+
+@api_router.get("/stock", response_model=List[Dict[str, Any]])
+async def get_stock(current_user: User = Depends(get_current_user)):
+    stock_items = await db.stock.find({}, {"_id": 0}).to_list(1000)
+    
+    for item in stock_items:
+        if isinstance(item.get('last_updated'), str):
+            item['last_updated'] = datetime.fromisoformat(item['last_updated'])
+        
+        product = await db.products.find_one({"id": item['product_id']}, {"_id": 0})
+        if product:
+            item['product_name'] = product['name']
+            item['product_sku'] = product['sku']
+            item['product_cost'] = product['cost']
+            item['product_color'] = product.get('color')
+    
+    return stock_items
+
+@api_router.put("/stock/{product_id}", response_model=Dict[str, Any])
+async def update_stock(product_id: str, stock_update: StockUpdate, current_user: User = Depends(get_current_user)):
+    update_data = {"quantity": stock_update.quantity, "last_updated": datetime.now(timezone.utc).isoformat()}
+    if stock_update.min_stock is not None:
+        update_data["min_stock"] = stock_update.min_stock
+    
+    # Calculate new status
+    status = calculate_stock_status(stock_update.quantity, stock_update.min_stock or 80)
+    update_data["status"] = status
+    
+    result = await db.stock.update_one(
+        {"product_id": product_id},
+        {"$set": update_data}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Stock not found")
+    
+    # Create stock movement
+    await create_stock_movement(product_id, "IN", stock_update.quantity, note="Manual adjustment")
+    
+    updated = await db.stock.find_one({"product_id": product_id}, {"_id": 0})
+    if isinstance(updated.get('last_updated'), str):
+        updated['last_updated'] = datetime.fromisoformat(updated['last_updated'])
+    
+    product = await db.products.find_one({"id": product_id}, {"_id": 0})
+    if product:
+        updated['product_name'] = product['name']
+        updated['product_sku'] = product['sku']
+        updated['product_cost'] = product['cost']
+    
+    return updated
+
+
+# ============================================================================
+# STOCK MOVEMENTS ROUTES
+# ============================================================================
+
+@api_router.get("/stock-movements", response_model=List[Dict[str, Any]])
+async def get_stock_movements(product_id: Optional[str] = None, current_user: User = Depends(get_current_user)):
+    query = {"product_id": product_id} if product_id else {}
+    movements = await db.stock_movements.find(query, {"_id": 0}).sort("date", -1).to_list(1000)
+    
+    for mov in movements:
+        if isinstance(mov.get('date'), str):
+            mov['date'] = datetime.fromisoformat(mov['date'])
+        
+        product = await db.products.find_one({"id": mov['product_id']}, {"_id": 0})
+        if product:
+            mov['product_name'] = product['name']
+    
+    return movements
+
+@api_router.post("/stock-movements", response_model=StockMovement, status_code=status.HTTP_201_CREATED)
+async def create_movement(movement_create: StockMovementCreate, current_user: User = Depends(get_current_user)):
+    await create_stock_movement(
+        movement_create.product_id,
+        movement_create.type,
+        movement_create.quantity,
+        movement_create.order_id,
+        movement_create.purchase_id,
+        movement_create.note
+    )
+    
+    # Update stock
+    multiplier = 1 if movement_create.type == "IN" else -1
+    await db.stock.update_one(
+        {"product_id": movement_create.product_id},
+        {"$inc": {"quantity": multiplier * movement_create.quantity}}
+    )
+    await update_stock_status(movement_create.product_id)
+    
+    return StockMovement(**movement_create.model_dump())
+
+
+# ============================================================================
+# SUPPLIER ROUTES
+# ============================================================================
+
+@api_router.get("/suppliers", response_model=List[Supplier])
+async def get_suppliers(current_user: User = Depends(get_current_user)):
+    suppliers = await db.suppliers.find({}, {"_id": 0}).to_list(1000)
+    for s in suppliers:
+        if isinstance(s.get('created_at'), str):
+            s['created_at'] = datetime.fromisoformat(s['created_at'])
+    return suppliers
+
+@api_router.post("/suppliers", response_model=Supplier, status_code=status.HTTP_201_CREATED)
+async def create_supplier(supplier_create: SupplierCreate, current_user: User = Depends(get_current_user)):
+    supplier = Supplier(**supplier_create.model_dump())
+    doc = supplier.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.suppliers.insert_one(doc)
+    return supplier
+
+@api_router.put("/suppliers/{supplier_id}", response_model=Supplier)
+async def update_supplier(supplier_id: str, supplier_update: SupplierCreate, current_user: User = Depends(get_current_user)):
+    result = await db.suppliers.update_one(
+        {"id": supplier_id},
+        {"$set": supplier_update.model_dump()}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    
+    updated = await db.suppliers.find_one({"id": supplier_id}, {"_id": 0})
+    if isinstance(updated.get('created_at'), str):
+        updated['created_at'] = datetime.fromisoformat(updated['created_at'])
+    return Supplier(**updated)
+
+@api_router.delete("/suppliers/{supplier_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_supplier(supplier_id: str, current_user: User = Depends(get_current_user)):
+    result = await db.suppliers.delete_one({"id": supplier_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    return None
+
+
+# ============================================================================
+# PURCHASE ROUTES
+# ============================================================================
+
+@api_router.get("/purchases", response_model=List[Dict[str, Any]])
+async def get_purchases(current_user: User = Depends(get_current_user)):
+    purchases = await db.purchases.find({}, {"_id": 0}).sort("date", -1).to_list(1000)
+    
+    for p in purchases:
+        if isinstance(p.get('date'), str):
+            p['date'] = datetime.fromisoformat(p['date'])
+        
+        # Get purchase lines
+        lines = await db.purchase_lines.find({"purchase_id": p['id']}, {"_id": 0}).to_list(1000)
+        p['lines'] = lines
+    
+    return purchases
+
+@api_router.post("/purchases", response_model=Dict[str, Any], status_code=status.HTTP_201_CREATED)
+async def create_purchase(purchase_create: PurchaseCreate, current_user: User = Depends(get_current_user)):
+    supplier = await db.suppliers.find_one({"id": purchase_create.supplier_id}, {"_id": 0})
+    if not supplier:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    
+    purchase = Purchase(
+        supplier_id=supplier['id'],
+        supplier_name=supplier['name'],
+        notes=purchase_create.notes
+    )
+    
+    # Create purchase lines
+    total_amount = 0
+    lines = []
+    
+    for item_data in purchase_create.items:
+        product = await db.products.find_one({"id": item_data['product_id']}, {"_id": 0})
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Product {item_data['product_id']} not found")
+        
+        quantity = item_data['quantity']
+        cost_price = product['cost']
+        
+        line = PurchaseLine(
+            purchase_id=purchase.id,
+            product_id=product['id'],
+            product_name=product['name'],
+            quantity=quantity,
+            cost_price=cost_price
+        )
+        lines.append(line.model_dump())
+        total_amount += quantity * cost_price
+    
+    purchase.total_amount = total_amount
+    
+    # Save purchase
+    purchase_doc = purchase.model_dump()
+    purchase_doc['date'] = purchase_doc['date'].isoformat()
+    await db.purchases.insert_one(purchase_doc)
+    
+    # Save lines
+    await db.purchase_lines.insert_many(lines)
+    
+    return {**purchase_doc, "lines": lines}
+
+@api_router.put("/purchases/{purchase_id}/receive", response_model=Dict[str, Any])
+async def receive_purchase(purchase_id: str, current_user: User = Depends(get_current_user)):
+    purchase = await db.purchases.find_one({"id": purchase_id}, {"_id": 0})
+    if not purchase:
+        raise HTTPException(status_code=404, detail="Purchase not found")
+    
+    # Get purchase lines
+    lines = await db.purchase_lines.find({"purchase_id": purchase_id}, {"_id": 0}).to_list(1000)
+    
+    # Update stock for all items
+    for line in lines:
+        await db.stock.update_one(
+            {"product_id": line['product_id']},
+            {"$inc": {"quantity": line['quantity']}}
+        )
+        await update_stock_status(line['product_id'])
+        await create_stock_movement(line['product_id'], "IN", line['quantity'], purchase_id=purchase_id, note="Purchase received")
+    
+    # Update purchase status
+    await db.purchases.update_one(
+        {"id": purchase_id},
+        {"$set": {"status": "Received"}}
+    )
+    
+    updated = await db.purchases.find_one({"id": purchase_id}, {"_id": 0})
+    if isinstance(updated.get('date'), str):
+        updated['date'] = datetime.fromisoformat(updated['date'])
+    
+    updated['lines'] = lines
+    return updated
+
+
+# ============================================================================
+# CUSTOMER ROUTES
+# ============================================================================
+
+@api_router.get("/customers", response_model=List[Customer])
+async def get_customers(current_user: User = Depends(get_current_user)):
+    customers = await db.customers.find({}, {"_id": 0}).to_list(1000)
+    for c in customers:
+        if isinstance(c.get('created_at'), str):
+            c['created_at'] = datetime.fromisoformat(c['created_at'])
+        if c.get('last_order_date') and isinstance(c['last_order_date'], str):
+            c['last_order_date'] = datetime.fromisoformat(c['last_order_date'])
+    return customers
+
+@api_router.post("/customers", response_model=Customer, status_code=status.HTTP_201_CREATED)
+async def create_customer(customer_create: CustomerCreate, current_user: User = Depends(get_current_user)):
+    customer = Customer(**customer_create.model_dump())
+    doc = customer.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    if doc.get('last_order_date'):
+        doc['last_order_date'] = doc['last_order_date'].isoformat()
+    await db.customers.insert_one(doc)
+    
+    # Create timeline entry
+    await create_timeline_entry(customer.id, "Note", f"Customer created: {customer.name}")
+    
+    return customer
+
+@api_router.put("/customers/{customer_id}", response_model=Customer)
+async def update_customer(customer_id: str, customer_update: CustomerCreate, current_user: User = Depends(get_current_user)):
+    result = await db.customers.update_one(
+        {"id": customer_id},
+        {"$set": customer_update.model_dump()}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    updated = await db.customers.find_one({"id": customer_id}, {"_id": 0})
+    if isinstance(updated.get('created_at'), str):
+        updated['created_at'] = datetime.fromisoformat(updated['created_at'])
+    if updated.get('last_order_date') and isinstance(updated['last_order_date'], str):
+        updated['last_order_date'] = datetime.fromisoformat(updated['last_order_date'])
+    
+    return Customer(**updated)
+
+@api_router.delete("/customers/{customer_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_customer(customer_id: str, current_user: User = Depends(get_current_user)):
+    result = await db.customers.delete_one({"id": customer_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return None
+
+@api_router.get("/customers/{customer_id}/timeline", response_model=List[CustomerTimeline])
+async def get_customer_timeline(customer_id: str, current_user: User = Depends(get_current_user)):
+    timeline = await db.customer_timeline.find({"customer_id": customer_id}, {"_id": 0}).sort("date", -1).to_list(1000)
+    for t in timeline:
+        if isinstance(t.get('date'), str):
+            t['date'] = datetime.fromisoformat(t['date'])
+    return timeline
+
+
+# ============================================================================
+# ORDER ROUTES
+# ============================================================================
+
+@api_router.get("/orders", response_model=List[Dict[str, Any]])
+async def get_orders(current_user: User = Depends(get_current_user)):
+    orders = await db.orders.find({}, {"_id": 0}).sort("date", -1).to_list(1000)
+    
+    for o in orders:
+        if isinstance(o.get('date'), str):
+            o['date'] = datetime.fromisoformat(o['date'])
+        if o.get('payment_date') and isinstance(o['payment_date'], str):
+            o['payment_date'] = datetime.fromisoformat(o['payment_date'])
+        
+        # Get order lines
+        lines = await db.order_lines.find({"order_id": o['id']}, {"_id": 0}).to_list(1000)
+        o['lines'] = lines
+    
+    return orders
+
+@api_router.post("/orders", response_model=Dict[str, Any], status_code=status.HTTP_201_CREATED)
+async def create_order(order_create: OrderCreate, current_user: User = Depends(get_current_user)):
+    customer = await db.customers.find_one({"id": order_create.customer_id}, {"_id": 0})
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    order = Order(
+        customer_id=customer['id'],
+        customer_name=customer['name'],
+        channel=order_create.channel,
+        shipping_paid_by_customer=order_create.shipping_paid_by_customer,
+        shipping_cost=order_create.shipping_cost,
+        payment_method=order_create.payment_method,
+        notes=order_create.notes
+    )
+    
+    # Create order lines and calculate totals
+    order_total = 0
+    cost_total = 0
+    lines = []
+    
+    for item_data in order_create.items:
+        product = await db.products.find_one({"id": item_data['product_id']}, {"_id": 0})
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Product {item_data['product_id']} not found")
+        
+        quantity = item_data['quantity']
+        sale_price = item_data.get('sale_price', product['price'])
+        discount = item_data.get('discount', 0)
+        
+        line_total = (sale_price * quantity) - discount
+        line_profit = line_total - (product['cost'] * quantity)
+        
+        line = OrderLine(
+            order_id=order.id,
+            product_id=product['id'],
+            product_name=product['name'],
+            quantity=quantity,
+            sale_price=sale_price,
+            cost_price=product['cost'],
+            discount=discount,
+            line_total=line_total,
+            line_profit=line_profit
+        )
+        lines.append(line.model_dump())
+        
+        order_total += line_total
+        cost_total += product['cost'] * quantity
+        
+        # Update stock
+        await db.stock.update_one(
+            {"product_id": product['id']},
+            {"$inc": {"quantity": -quantity}}
+        )
+        await update_stock_status(product['id'])
+        await create_stock_movement(product['id'], "OUT", quantity, order_id=order.id, note="Order created")
+    
+    # Calculate profit
+    order_total += order.shipping_paid_by_customer
+    cost_total += order.shipping_cost
+    profit = order_total - cost_total
+    profit_percent = (profit / order_total * 100) if order_total > 0 else 0
+    
+    order.order_total = order_total
+    order.cost_total = cost_total
+    order.profit = profit
+    order.profit_percent = profit_percent
+    order.status = "Processing"
+    
+    # Save order
+    order_doc = order.model_dump()
+    order_doc['date'] = order_doc['date'].isoformat()
+    if order_doc.get('payment_date'):
+        order_doc['payment_date'] = order_doc['payment_date'].isoformat()
+    await db.orders.insert_one(order_doc)
+    
+    # Save lines
+    await db.order_lines.insert_many(lines)
+    
+    # Update customer stats
+    await update_customer_stats(customer['id'])
+    
+    # Create timeline entry
+    await create_timeline_entry(customer['id'], "Order", f"New order created: {order.id[:8]} - {order_total:.2f} kr")
+    
+    return {**order_doc, "lines": lines}
+
+@api_router.put("/orders/{order_id}/status")
+async def update_order_status(order_id: str, status: str, current_user: User = Depends(get_current_user)):
+    result = await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {"status": status}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # If order is delivered, create follow-up task
+    if status == "Delivered":
+        order = await db.orders.find_one({"id": order_id})
+        if order:
+            due_date = datetime.now(timezone.utc) + timedelta(days=7)
+            task = Task(
+                title=f"Follow up customer: {order['customer_name']}",
+                description=f"Follow up on order {order_id[:8]}",
+                due_date=due_date,
+                priority="Medium",
+                type="Customer",
+                customer_id=order['customer_id'],
+                order_id=order_id
+            )
+            task_doc = task.model_dump()
+            task_doc['created_at'] = task_doc['created_at'].isoformat()
+            if task_doc.get('due_date'):
+                task_doc['due_date'] = task_doc['due_date'].isoformat()
+            await db.tasks.insert_one(task_doc)
+    
+    return {"message": "Order status updated"}
+
+
+# ============================================================================
+# TASK ROUTES
+# ============================================================================
+
+@api_router.get("/tasks", response_model=List[Task])
+async def get_tasks(status: Optional[str] = None, current_user: User = Depends(get_current_user)):
+    query = {"status": status} if status else {}
+    tasks = await db.tasks.find(query, {"_id": 0}).sort("due_date", 1).to_list(1000)
+    
+    for t in tasks:
+        if isinstance(t.get('created_at'), str):
+            t['created_at'] = datetime.fromisoformat(t['created_at'])
+        if t.get('due_date') and isinstance(t['due_date'], str):
+            t['due_date'] = datetime.fromisoformat(t['due_date'])
+    
+    return tasks
+
+@api_router.post("/tasks", response_model=Task, status_code=status.HTTP_201_CREATED)
+async def create_task(task_create: TaskCreate, current_user: User = Depends(get_current_user)):
+    task = Task(**task_create.model_dump())
+    doc = task.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    if doc.get('due_date'):
+        doc['due_date'] = doc['due_date'].isoformat()
+    await db.tasks.insert_one(doc)
+    return task
+
+@api_router.put("/tasks/{task_id}", response_model=Task)
+async def update_task(task_id: str, task_update: TaskCreate, current_user: User = Depends(get_current_user)):
+    result = await db.tasks.update_one(
+        {"id": task_id},
+        {"$set": task_update.model_dump()}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    updated = await db.tasks.find_one({"id": task_id}, {"_id": 0})
+    if isinstance(updated.get('created_at'), str):
+        updated['created_at'] = datetime.fromisoformat(updated['created_at'])
+    if updated.get('due_date') and isinstance(updated['due_date'], str):
+        updated['due_date'] = datetime.fromisoformat(updated['due_date'])
+    
+    return Task(**updated)
+
+@api_router.put("/tasks/{task_id}/status")
+async def update_task_status(task_id: str, status: str, current_user: User = Depends(get_current_user)):
+    result = await db.tasks.update_one(
+        {"id": task_id},
+        {"$set": {"status": status}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"message": "Task status updated"}
+
+@api_router.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_task(task_id: str, current_user: User = Depends(get_current_user)):
+    result = await db.tasks.delete_one({"id": task_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return None
+
+
+# ============================================================================
+# EXPENSE ROUTES
+# ============================================================================
+
+@api_router.get("/expenses", response_model=List[Expense])
+async def get_expenses(current_user: User = Depends(get_current_user)):
+    expenses = await db.expenses.find({}, {"_id": 0}).sort("date", -1).to_list(1000)
+    for e in expenses:
+        if isinstance(e.get('date'), str):
+            e['date'] = datetime.fromisoformat(e['date'])
+    return expenses
+
+@api_router.post("/expenses", response_model=Expense, status_code=status.HTTP_201_CREATED)
+async def create_expense(expense_create: ExpenseCreate, current_user: User = Depends(get_current_user)):
+    expense = Expense(**expense_create.model_dump())
+    doc = expense.model_dump()
+    doc['date'] = doc['date'].isoformat()
+    await db.expenses.insert_one(doc)
+    return expense
+
+@api_router.delete("/expenses/{expense_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_expense(expense_id: str, current_user: User = Depends(get_current_user)):
+    result = await db.expenses.delete_one({"id": expense_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Expense not found")
+    return None
+
+
+# ============================================================================
+# DASHBOARD ROUTES
+# ============================================================================
+
+@api_router.get("/dashboard")
+async def get_dashboard(current_user: User = Depends(get_current_user)):
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today_str = today.isoformat()
+    
+    # Today's orders
+    today_orders = await db.orders.find({
+        "date": {"$gte": today_str},
+        "status": {"$in": ["Processing", "Packed", "Shipped", "Delivered"]}
+    }, {"_id": 0}).to_list(1000)
+    
+    today_sales = sum(order.get('order_total', 0) for order in today_orders)
+    today_profit = sum(order.get('profit', 0) for order in today_orders)
+    orders_count = len(today_orders)
+    
+    # Low stock count
+    low_stock = await db.stock.find({"status": {"$in": ["Low", "Out"]}}, {"_id": 0}).to_list(1000)
+    low_stock_count = len(low_stock)
+    
+    # Tasks
+    all_tasks = await db.tasks.find({"status": {"$ne": "Done"}}, {"_id": 0}).to_list(1000)
+    for t in all_tasks:
+        if t.get('due_date') and isinstance(t['due_date'], str):
+            t['due_date'] = datetime.fromisoformat(t['due_date'])
+    
+    today_tasks = [t for t in all_tasks if t.get('due_date') and t['due_date'].date() == datetime.now(timezone.utc).date()][:3]
+    week_end = datetime.now(timezone.utc) + timedelta(days=7)
+    week_tasks = [t for t in all_tasks if t.get('due_date') and t['due_date'] < week_end]
+    overdue_tasks = [t for t in all_tasks if t.get('due_date') and t['due_date'] < datetime.now(timezone.utc)]
+    
+    # Best sellers (last 30 days)
+    month_ago = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+    recent_orders = await db.orders.find({
+        "date": {"$gte": month_ago},
+        "status": {"$in": ["Processing", "Packed", "Shipped", "Delivered"]}
+    }, {"_id": 0}).to_list(1000)
+    
+    product_sales = {}
+    product_profit = {}
+    
+    for order in recent_orders:
+        lines = await db.order_lines.find({"order_id": order['id']}, {"_id": 0}).to_list(1000)
+        for line in lines:
+            pid = line['product_id']
+            if pid not in product_sales:
+                product_sales[pid] = {"name": line['product_name'], "quantity": 0, "revenue": 0}
+                product_profit[pid] = {"name": line['product_name'], "profit": 0}
+            product_sales[pid]['quantity'] += line['quantity']
+            product_sales[pid]['revenue'] += line['line_total']
+            product_profit[pid]['profit'] += line['line_profit']
+    
+    best_sellers = sorted(product_sales.values(), key=lambda x: x['quantity'], reverse=True)[:5]
+    most_profitable = sorted(product_profit.values(), key=lambda x: x['profit'], reverse=True)[:5]
+    
+    # Customer segments
+    customers = await db.customers.find({}, {"_id": 0}).to_list(1000)
+    vip_customers = [c for c in customers if c.get('status') == 'VIP'][:5]
+    new_customers = sorted([c for c in customers if c.get('status') == 'New'], 
+                          key=lambda x: x.get('created_at', ''), reverse=True)[:5]
+    
+    # Customers needing follow-up
+    inactive_threshold = (datetime.now(timezone.utc) - timedelta(days=60)).isoformat()
+    need_followup = [c for c in customers 
+                     if c.get('last_order_date') and c['last_order_date'] < inactive_threshold 
+                     and c.get('status') == 'Active'][:5]
+    
+    lost_customers = [c for c in customers if c.get('status') == 'Lost'][:5]
+    
+    # Monthly sales graph (last 6 months)
+    monthly_sales = []
+    monthly_profit = []
+    for i in range(6):
+        month_start = (datetime.now(timezone.utc).replace(day=1) - timedelta(days=30*i)).replace(hour=0, minute=0, second=0, microsecond=0)
+        month_end = (month_start + timedelta(days=32)).replace(day=1)
+        
+        month_orders = await db.orders.find({
+            "date": {"$gte": month_start.isoformat(), "$lt": month_end.isoformat()},
+            "status": {"$in": ["Processing", "Packed", "Shipped", "Delivered"]}
+        }, {"_id": 0}).to_list(1000)
+        
+        sales = sum(o.get('order_total', 0) for o in month_orders)
+        profit = sum(o.get('profit', 0) for o in month_orders)
+        
+        monthly_sales.insert(0, {"month": month_start.strftime("%b"), "value": sales})
+        monthly_profit.insert(0, {"month": month_start.strftime("%b"), "value": profit})
+    
+    # Channel performance
+    channel_stats = {}
+    for order in recent_orders:
+        channel = order.get('channel', 'Direct')
+        if channel not in channel_stats:
+            channel_stats[channel] = {"orders": 0, "revenue": 0, "profit": 0}
+        channel_stats[channel]['orders'] += 1
+        channel_stats[channel]['revenue'] += order.get('order_total', 0)
+        channel_stats[channel]['profit'] += order.get('profit', 0)
+    
+    channel_performance = [{"channel": k, **v} for k, v in channel_stats.items()]
+    
+    return {
+        "top_panel": {
+            "today_sales": round(today_sales, 2),
+            "today_profit": round(today_profit, 2),
+            "orders_today": orders_count,
+            "low_stock": low_stock_count
+        },
+        "tasks": {
+            "today_top3": today_tasks,
+            "this_week": week_tasks,
+            "overdue": overdue_tasks
+        },
+        "sales_profit_graphs": {
+            "monthly_sales": monthly_sales,
+            "monthly_profit": monthly_profit
+        },
+        "products": {
+            "best_sellers": best_sellers,
+            "most_profitable": most_profitable,
+            "low_stock": low_stock[:10]
+        },
+        "customers": {
+            "vip": vip_customers,
+            "new_this_week": new_customers,
+            "need_followup": need_followup,
+            "lost": lost_customers
+        },
+        "channel_performance": channel_performance
+    }
+
+
+# ============================================================================
+# REPORTS ROUTES
+# ============================================================================
+
+@api_router.get("/reports/daily")
+async def get_daily_report(date: Optional[str] = None, current_user: User = Depends(get_current_user)):
+    if date:
+        target_date = datetime.fromisoformat(date)
+    else:
+        target_date = datetime.now(timezone.utc)
+    
+    day_start = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    day_end = day_start + timedelta(days=1)
+    
+    orders = await db.orders.find({
+        "date": {"$gte": day_start.isoformat(), "$lt": day_end.isoformat()},
+        "status": {"$in": ["Processing", "Packed", "Shipped", "Delivered"]}
+    }, {"_id": 0}).to_list(1000)
+    
+    daily_sales = sum(o.get('order_total', 0) for o in orders)
+    daily_profit = sum(o.get('profit', 0) for o in orders)
+    orders_today = len(orders)
+    
+    # Low stock
+    low_stock = await db.stock.find({"status": {"$in": ["Low", "Out"]}}).to_list(1000)
+    
+    return {
+        "date": target_date.strftime("%Y-%m-%d"),
+        "daily_sales": round(daily_sales, 2),
+        "daily_profit": round(daily_profit, 2),
+        "orders_today": orders_today,
+        "low_stock_count": len(low_stock)
+    }
+
+@api_router.get("/reports/monthly")
+async def get_monthly_report(month: Optional[int] = None, year: Optional[int] = None, current_user: User = Depends(get_current_user)):
+    now = datetime.now(timezone.utc)
+    target_month = month or now.month
+    target_year = year or now.year
+    
+    month_start = datetime(target_year, target_month, 1, tzinfo=timezone.utc)
+    if target_month == 12:
+        month_end = datetime(target_year + 1, 1, 1, tzinfo=timezone.utc)
+    else:
+        month_end = datetime(target_year, target_month + 1, 1, tzinfo=timezone.utc)
+    
+    orders = await db.orders.find({
+        "date": {"$gte": month_start.isoformat(), "$lt": month_end.isoformat()},
+        "status": {"$in": ["Processing", "Packed", "Shipped", "Delivered"]}
+    }, {"_id": 0}).to_list(1000)
+    
+    monthly_sales = sum(o.get('order_total', 0) for o in orders)
+    monthly_profit = sum(o.get('profit', 0) for o in orders)
+    
+    # Top products
+    product_stats = {}
+    for order in orders:
+        lines = await db.order_lines.find({"order_id": order['id']}).to_list(1000)
+        for line in lines:
+            pid = line['product_id']
+            if pid not in product_stats:
+                product_stats[pid] = {"name": line['product_name'], "quantity": 0, "revenue": 0}
+            product_stats[pid]['quantity'] += line['quantity']
+            product_stats[pid]['revenue'] += line['line_total']
+    
+    top_products = sorted(product_stats.values(), key=lambda x: x['revenue'], reverse=True)[:10]
+    
+    # Top customers
+    customer_stats = {}
+    for order in orders:
+        cid = order['customer_id']
+        if cid not in customer_stats:
+            customer_stats[cid] = {"name": order['customer_name'], "orders": 0, "revenue": 0}
+        customer_stats[cid]['orders'] += 1
+        customer_stats[cid]['revenue'] += order.get('order_total', 0)
+    
+    top_customers = sorted(customer_stats.values(), key=lambda x: x['revenue'], reverse=True)[:10]
+    
+    return {
+        "month": target_month,
+        "year": target_year,
+        "monthly_sales": round(monthly_sales, 2),
+        "monthly_profit": round(monthly_profit, 2),
+        "orders_count": len(orders),
+        "top_products": top_products,
+        "top_customers": top_customers
+    }
+
+
+# ============================================================================
+# SEARCH ROUTE
+# ============================================================================
+
+@api_router.get("/search")
+async def search(q: str, current_user: User = Depends(get_current_user)):
+    query_lower = q.lower()
+    results = {"products": [], "customers": [], "orders": [], "tasks": [], "expenses": []}
+    
+    # Search products
+    products = await db.products.find({}, {"_id": 0}).to_list(1000)
+    results['products'] = [p for p in products if query_lower in p.get('name', '').lower() or query_lower in p.get('sku', '').lower()][:10]
+    
+    # Search customers
+    customers = await db.customers.find({}, {"_id": 0}).to_list(1000)
+    results['customers'] = [c for c in customers if query_lower in c.get('name', '').lower() or query_lower in c.get('email', '').lower()][:10]
+    
+    # Search orders
+    orders = await db.orders.find({}, {"_id": 0}).to_list(1000)
+    results['orders'] = [o for o in orders if query_lower in o.get('customer_name', '').lower() or query_lower in o.get('id', '')][:10]
+    
+    # Search tasks
+    tasks = await db.tasks.find({}, {"_id": 0}).to_list(1000)
+    results['tasks'] = [t for t in tasks if query_lower in t.get('title', '').lower() or query_lower in t.get('description', '').lower()][:10]
+    
+    # Search expenses
+    expenses = await db.expenses.find({}, {"_id": 0}).to_list(1000)
+    results['expenses'] = [e for e in expenses if query_lower in e.get('category', '').lower() or query_lower in e.get('notes', '').lower()][:10]
+    
+    return results
+
+
+# ============================================================================
+# SEED DATA ROUTE
+# ============================================================================
+
+@api_router.post("/seed-data", status_code=status.HTTP_201_CREATED)
+async def seed_data():
+    """Populate database with comprehensive test data"""
+    
+    # Clear existing
+    await db.products.delete_many({})
+    await db.stock.delete_many({})
+    await db.stock_movements.delete_many({})
+    await db.customers.delete_many({})
+    await db.customer_timeline.delete_many({})
+    await db.suppliers.delete_many({})
+    await db.purchases.delete_many({})
+    await db.purchase_lines.delete_many({})
+    await db.orders.delete_many({})
+    await db.order_lines.delete_many({})
+    await db.tasks.delete_many({})
+    await db.expenses.delete_many({})
+    
+    # Create suppliers
+    suppliers = [
+        {"id": str(uuid.uuid4()), "name": "Nordic Supplements AS", "contact_person": "Per Olsen", 
+         "email": "ordre@nordicsupplements.no", "phone": "22334455", "address": "Industriveien 10, 0581 Oslo",
+         "website": "www.nordicsupplements.no", "created_at": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "name": "VitaImport Norge", "contact_person": "Anne Berg",
+         "email": "salg@vitaimport.no", "phone": "55667788", "address": "Havnepromenaden 3, 5013 Bergen",
+         "website": "www.vitaimport.no", "created_at": datetime.now(timezone.utc).isoformat()}
+    ]
+    await db.suppliers.insert_many(suppliers)
+    
+    # Create products
+    products = [
+        {"id": str(uuid.uuid4()), "sku": "ZV-D3K2-001", "name": "D3 + K2 Premium", 
+         "description": "Vitamin D3 5000 IU + K2 MK-7 200 mcg", "category": "vitamin",
+         "cost": 89.0, "price": 299.0, "supplier_id": suppliers[0]['id'], "color": "d3", "active": True,
+         "created_at": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "sku": "ZV-OM3-001", "name": "Omega-3 Triglyceride",
+         "description": "EPA 1000mg + DHA 500mg", "category": "supplement",
+         "cost": 95.0, "price": 349.0, "supplier_id": suppliers[0]['id'], "color": "omega", "active": True,
+         "created_at": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "sku": "ZV-MAG-001", "name": "Magnesium Glysinat 400mg",
+         "description": "Høyt biotilgjengelig magnesium", "category": "mineral",
+         "cost": 72.0, "price": 249.0, "supplier_id": suppliers[1]['id'], "color": "mag", "active": True,
+         "created_at": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "sku": "ZV-CZNC-001", "name": "C-vitamin + Sink",
+         "description": "Vitamin C 1000mg + Sink 15mg", "category": "vitamin",
+         "cost": 58.0, "price": 199.0, "supplier_id": suppliers[1]['id'], "color": "csink", "active": True,
+         "created_at": datetime.now(timezone.utc).isoformat()}
+    ]
+    await db.products.insert_many(products)
+    
+    # Create stock
+    stock_items = [
+        {"id": str(uuid.uuid4()), "product_id": products[0]['id'], "quantity": 312, "min_stock": 100, "status": "OK", "last_updated": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "product_id": products[1]['id'], "quantity": 284, "min_stock": 150, "status": "OK", "last_updated": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "product_id": products[2]['id'], "quantity": 75, "min_stock": 120, "status": "Low", "last_updated": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "product_id": products[3]['id'], "quantity": 198, "min_stock": 100, "status": "OK", "last_updated": datetime.now(timezone.utc).isoformat()}
+    ]
+    await db.stock.insert_many(stock_items)
+    
+    # Create customers
+    customers = [
+        {"id": str(uuid.uuid4()), "name": "Kari Nordmann", "email": "kari.nordmann@example.no", 
+         "phone": "91234567", "address": "Storgata 1", "city": "Oslo", "zip_code": "0150",
+         "type": "Private", "status": "Active", "total_value": 0, "order_count": 0,
+         "created_at": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "name": "Ola Hansen", "email": "ola.hansen@example.no",
+         "phone": "98765432", "address": "Fjordveien 25", "city": "Bergen", "zip_code": "5003",
+         "type": "Private", "status": "VIP", "total_value": 0, "order_count": 0,
+         "created_at": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "name": "Helse AS", "email": "post@helse.no",
+         "phone": "22998877", "address": "Næringsveien 42", "city": "Oslo", "zip_code": "0580",
+         "type": "Business", "status": "Active", "total_value": 0, "order_count": 0,
+         "created_at": datetime.now(timezone.utc).isoformat()}
+    ]
+    await db.customers.insert_many(customers)
+    
+    # Create some tasks
+    tasks = [
+        {"id": str(uuid.uuid4()), "title": "Bestill mer Magnesium", "description": "Lageret går tom",
+         "due_date": (datetime.now(timezone.utc) + timedelta(days=2)).isoformat(), "priority": "High",
+         "status": "Planned", "type": "Stock", "product_id": products[2]['id'], "assigned_to": "Jabar",
+         "created_at": datetime.now(timezone.utc).isoformat()},
+        {"id": str(uuid.uuid4()), "title": "Følg opp VIP-kunde", "description": "Ola Hansen - sjekk tilfredshet",
+         "due_date": (datetime.now(timezone.utc) + timedelta(days=1)).isoformat(), "priority": "Medium",
+         "status": "Planned", "type": "Customer", "customer_id": customers[1]['id'], "assigned_to": "Jabar",
+         "created_at": datetime.now(timezone.utc).isoformat()}
+    ]
+    await db.tasks.insert_many(tasks)
+    
+    # Create expenses
+    expenses = [
+        {"id": str(uuid.uuid4()), "date": datetime.now(timezone.utc).isoformat(), "category": "Marketing",
+         "amount": 8500.0, "payment_status": "Paid", "notes": "Facebook Ads - Januar"},
+        {"id": str(uuid.uuid4()), "date": datetime.now(timezone.utc).isoformat(), "category": "Shipping",
+         "amount": 6200.0, "payment_status": "Paid", "notes": "Posten - Månedlig avtale"},
+        {"id": str(uuid.uuid4()), "date": datetime.now(timezone.utc).isoformat(), "category": "Software",
+         "amount": 3700.0, "payment_status": "Unpaid", "notes": "Shopify abonnement"}
+    ]
+    await db.expenses.insert_many(expenses)
+    
+    return {"message": "Complete test data created successfully"}
+
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
