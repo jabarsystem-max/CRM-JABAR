@@ -1964,6 +1964,16 @@ app.add_middleware(
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_db():
+    """Initialize database indexes on startup"""
+    try:
+        from utils import create_indexes
+        await create_indexes(db)
+        logger.info("Database indexes created successfully")
+    except Exception as e:
+        logger.warning(f"Could not create indexes: {e}")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
