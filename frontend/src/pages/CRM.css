@@ -542,6 +542,94 @@
 
 .modal-large {
   max-width: 800px;
+
+
+/* Reports */
+.reports-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.report-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.report-card h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.report-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.report-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.report-label {
+  font-size: 13px;
+  color: #7b8794;
+}
+
+.report-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e2a32;
+}
+
+.reports-tables {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.report-table-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.report-table-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+/* Search */
+.search-section {
+  margin-bottom: 30px;
+}
+
+.search-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.no-results {
+  text-align: center;
+  padding: 40px;
+  color: #7b8794;
+  font-size: 16px;
+}
+
+/* Overdue Row */
+.overdue-row {
+  background: #fef2f2;
+}
+
 }
 
 .clickable {
