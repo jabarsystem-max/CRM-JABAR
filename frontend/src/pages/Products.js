@@ -188,17 +188,40 @@ const Products = () => {
                   />
                 </div>
               </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Min. lagernivå</label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.min_stock}
+                    onChange={e => setFormData({...formData, min_stock: parseInt(e.target.value)})}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Farge (UI)</label>
+                  <select
+                    value={formData.color}
+                    onChange={e => setFormData({...formData, color: e.target.value})}
+                    className="form-select"
+                  >
+                    <option value="d3">D3 (Orange)</option>
+                    <option value="omega">Omega (Blå)</option>
+                    <option value="mag">Magnesium (Grønn)</option>
+                    <option value="csink">C+Sink (Gul)</option>
+                  </select>
+                </div>
+              </div>
               <div className="form-group">
-                <label>Farge (UI)</label>
+                <label>Leverandør</label>
                 <select
-                  value={formData.color}
-                  onChange={e => setFormData({...formData, color: e.target.value})}
+                  value={formData.supplier_id}
+                  onChange={e => setFormData({...formData, supplier_id: e.target.value})}
                   className="form-select"
                 >
-                  <option value="d3">D3 (Orange)</option>
-                  <option value="omega">Omega (Blå)</option>
-                  <option value="mag">Magnesium (Grønn)</option>
-                  <option value="csink">C+Sink (Gul)</option>
+                  <option value="">Ingen leverandør valgt</option>
+                  {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
               <div className="modal-actions">
