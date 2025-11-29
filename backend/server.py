@@ -1005,32 +1005,6 @@ async def seed_data():
     
     await db.customers.insert_many(customers)
     
-    # Create suppliers
-    suppliers = [
-        {
-            "id": str(uuid.uuid4()),
-            "name": "Nordic Supplements AS",
-            "contact_person": "Per Olsen",
-            "email": "ordre@nordicsupplements.no",
-            "phone": "22334455",
-            "address": "Industriveien 10, 0581 Oslo",
-            "products_supplied": [products[0]['id'], products[1]['id']],
-            "created_at": datetime.now(timezone.utc).isoformat()
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "VitaImport Norge",
-            "contact_person": "Anne Berg",
-            "email": "salg@vitaimport.no",
-            "phone": "55667788",
-            "address": "Havnepromenaden 3, 5013 Bergen",
-            "products_supplied": [products[2]['id'], products[3]['id']],
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-    ]
-    
-    await db.suppliers.insert_many(suppliers)
-    
     # Create some orders (today's orders)
     today = datetime.now(timezone.utc)
     orders = []
