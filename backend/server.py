@@ -266,6 +266,26 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     
     return User(**user_data)
 
+def calculate_stock_status(quantity: int, min_stock: int) -> str:
+    """Calculate stock status based on quantity and minimum stock level"""
+    if quantity == 0:
+        return "Out"
+    elif quantity < min_stock:
+        return "Low"
+    else:
+        return "OK"
+
+async def update_product_stock_status(product_id: str, quantity: int):
+    """Update product stock status based on current quantity"""
+    product = await db.products.find_one({"id": product_id}, {"_id": 0})
+    if product:
+        min_stock = product.get('min_stock', 80)
+        stock_status = calculate_stock_status(quantity, min_stock)
+        await db.products.update_one(
+            {"id": product_id},
+            {"$set": {"stock_status": stock_status}}
+        )
+
 
 # ============================================================================
 # AUTH ROUTES
