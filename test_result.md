@@ -101,3 +101,175 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Test fullstendig ZenVit CRM frontend-applikasjon med login, dashboard, produkter, lager, kunder, oppgaver, ordrer, innkjøp, leverandører, utgifter, rapporter og navigasjon"
+
+frontend:
+  - task: "Login functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Login.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "testing"
+        - comment: "Need to test login with admin@zenvit.no / admin123"
+
+  - task: "Dashboard with KPIs and widgets"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "testing"
+        - comment: "Need to verify dashboard shows top panel KPIs, tasks, graphs, products, customers, channel analysis"
+
+  - task: "Products page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Products.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "testing"
+        - comment: "Need to verify 4 products with specific prices: D3+K2 Premium (299kr), Omega-3 Triglyceride (349kr), Magnesium Glysinat 400mg (249kr), C-vitamin+Sink (199kr)"
+
+  - task: "Stock/Inventory page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Stock.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "testing"
+        - comment: "Need to verify stock overview shows 869 total stock, 71632kr total value, 1 low stock product (Magnesium - 75 stk)"
+
+  - task: "Customers page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Customers.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "testing"
+        - comment: "Need to verify 3 customers: Kari Nordmann (Active), Ola Hansen (VIP), Helse AS (Active)"
+
+  - task: "Tasks page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Tasks.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "testing"
+        - comment: "Need to verify 2 tasks: 'Følg opp VIP-kunde' and 'Bestill mer Magnesium'"
+
+  - task: "Orders page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Orders.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "testing"
+        - comment: "Need to verify page loads (even if empty)"
+
+  - task: "Purchases page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Purchases.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "testing"
+        - comment: "Need to verify page loads"
+
+  - task: "Suppliers page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Suppliers.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "testing"
+        - comment: "Need to verify 2 suppliers: Nordic Supplements AS, VitaImport Norge"
+
+  - task: "Expenses page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Expenses.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "testing"
+        - comment: "Need to verify 3 expenses are displayed"
+
+  - task: "Reports page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Reports.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "testing"
+        - comment: "Need to verify daily and monthly reports display"
+
+  - task: "Navigation functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+        - agent: "testing"
+        - comment: "Need to verify all menu buttons work and navigate correctly"
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+
+test_plan:
+  current_focus:
+    - "Login functionality"
+    - "Dashboard with KPIs and widgets"
+    - "Products page"
+    - "Stock/Inventory page"
+    - "Customers page"
+    - "Tasks page"
+    - "Suppliers page"
+    - "Expenses page"
+    - "Reports page"
+    - "Navigation functionality"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "testing"
+    - message: "Starting comprehensive testing of ZenVit CRM frontend application. Will test login, all pages, data verification, and navigation functionality."
