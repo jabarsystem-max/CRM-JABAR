@@ -1773,9 +1773,71 @@ async def get_automation_status(current_user: User = Depends(get_current_user)):
                 "enabled": False,
                 "description": "Identifies customers needing follow-up",
                 "customers_needing_followup": customers_needing_followup
+            },
+            "email_notifications": {
+                "enabled": EMAIL_ENABLED,
+                "description": "Email notifications for important events",
+                "smtp_configured": bool(SMTP_USER and SMTP_PASSWORD)
             }
         }
     }
+
+@api_router.post("/automation/test-email")
+async def test_email_notification(email: str, current_user: User = Depends(get_current_user)):
+    """Send a test email to verify email configuration"""
+    subject = "🧪 Test E-post fra ZenVit CRM"
+    body = """
+Hei!
+
+Dette er en test e-post fra ZenVit CRM-systemet.
+
+Hvis du mottar denne e-posten, er e-postkonfigurasjonen din korrekt satt opp.
+
+Med vennlig hilsen,
+ZenVit CRM System
+    """
+    
+    html_body = """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; padding: 20px; border-radius: 8px; }
+        .content { background: #f9fafb; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .footer { text-align: center; color: #7b8794; font-size: 12px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>🧪 Test E-post</h2>
+        </div>
+        <div class="content">
+            <p>Hei!</p>
+            <p>Dette er en test e-post fra <strong>ZenVit CRM-systemet</strong>.</p>
+            <p>Hvis du mottar denne e-posten, er e-postkonfigurasjonen din korrekt satt opp og klar til bruk! ✅</p>
+        </div>
+        <div class="footer">
+            <p>Dette er en automatisk e-post fra ZenVit CRM System</p>
+        </div>
+    </div>
+</body>
+</html>
+    """
+    
+    success = await send_email(email, subject, body, html_body)
+    
+    if success:
+        return {"message": f"Test e-post sendt til {email}", "success": True}
+    else:
+        return {
+            "message": f"Kunne ikke sende e-post. E-post er {'ikke aktivert eller' if not EMAIL_ENABLED else ''} ikke konfigurert korrekt.",
+            "success": False,
+            "email_enabled": EMAIL_ENABLED,
+            "smtp_configured": bool(SMTP_USER and SMTP_PASSWORD)
+        }
 
 
 # ============================================================================
