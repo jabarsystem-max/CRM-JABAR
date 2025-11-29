@@ -17,8 +17,11 @@ const Products = () => {
     sku: '',
     price: '',
     cost: '',
+    min_stock: 80,
+    supplier_id: '',
     color: 'omega'
   });
+  const [suppliers, setSuppliers] = useState([]);
 
   const fetchProducts = async () => {
     try {
