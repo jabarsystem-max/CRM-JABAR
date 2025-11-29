@@ -126,13 +126,11 @@ class Inventory(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     product_id: str
     quantity: int
-    min_quantity: int = 80  # Lav lagergrense
     location: Optional[str] = None
     last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class InventoryUpdate(BaseModel):
     quantity: int
-    min_quantity: Optional[int] = None
 
 
 # --- Order Models ---
