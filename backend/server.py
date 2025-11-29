@@ -528,10 +528,14 @@ async def create_order(order_create: OrderCreate, current_user: User = Depends(g
         subtotal += total
         
         # Update inventory
-        await db.inventory.update_one(
+        inv_result = await db.inventory.find_one_and_update(
             {"product_id": product['id']},
-            {"$inc": {"quantity": -quantity}, "$set": {"last_updated": datetime.now(timezone.utc).isoformat()}}
+            {"$inc": {"quantity": -quantity}, "$set": {"last_updated": datetime.now(timezone.utc).isoformat()}},
+            return_document=True
         )
+        if inv_result:
+            # Update product stock status
+            await update_product_stock_status(product['id'], inv_result['quantity'])
     
     order = Order(
         customer_id=customer['id'],
