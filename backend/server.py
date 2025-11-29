@@ -1379,6 +1379,9 @@ async def create_order(order_create: OrderCreate, current_user: User = Depends(g
     # Send email notification for new order
     await send_new_order_notification(order.id, customer['name'], order_total)
     
+    # Remove MongoDB's _id field if it exists to prevent BSON serialization error
+    order_doc.pop('_id', None)
+    
     return {**order_doc, "lines": lines}
 
 @api_router.put("/orders/{order_id}/status")
