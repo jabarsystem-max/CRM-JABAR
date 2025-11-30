@@ -515,20 +515,24 @@ const Products = () => {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Produktbilde URL</label>
-                    <input
-                      type="url"
-                      name="image_url"
-                      value={formData.image_url}
-                      onChange={handleChange}
-                      className="form-input"
-                      placeholder="https://..."
-                    />
-                    {formData.image_url && (
-                      <div className="image-preview">
-                        <img src={formData.image_url} alt="Preview" />
-                      </div>
-                    )}
+                    <label className="form-label">Produktbilde</label>
+                    <div className="file-upload-container">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/jpg,image/webp"
+                        onChange={handleImageUpload}
+                        className="form-input"
+                        id="image-upload"
+                        disabled={uploadingImage}
+                      />
+                      {uploadingImage && <p className="upload-status">Laster opp bilde...</p>}
+                      {formData.image_url && (
+                        <div className="image-preview">
+                          <img src={formData.image_url} alt="Preview" />
+                        </div>
+                      )}
+                    </div>
+                    <small className="form-help-text">Maks 5MB. Tillatte formater: JPEG, PNG, WebP</small>
                   </div>
 
                   <div className="form-row">
