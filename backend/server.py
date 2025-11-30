@@ -85,16 +85,40 @@ class TokenResponse(BaseModel):
 class Product(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    active: bool = True
+    
+    # Basic info
     sku: str
     name: str
+    short_description: Optional[str] = None
+    description: Optional[str] = None
+    full_description: Optional[str] = None  # Markdown
+    
+    # Categorization
     category: str
+    subcategory: Optional[str] = None
+    brand: Optional[str] = None
+    health_areas: Optional[List[str]] = []  # Tags: Immun, Søvn, Energi, etc.
+    
+    # Product details
+    ean: Optional[str] = None  # Barcode
+    packaging_type: Optional[str] = None  # flaske, glass, boks, pakke
+    units_per_package: Optional[int] = 1
+    weight_grams: Optional[float] = None
+    
+    # Pricing
     cost: float
     price: float
-    description: Optional[str] = None
+    min_stock: int = 80
+    
+    # Relations
     supplier_id: Optional[str] = None
-    active: bool = True
+    
+    # UI/Display
     color: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    image_url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
 
 class ProductCreate(BaseModel):
     sku: str
