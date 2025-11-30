@@ -40,8 +40,10 @@ const Products = () => {
   }, [token]);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    if (token) {
+      fetchProducts();
+    }
+  }, [token, fetchProducts]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
