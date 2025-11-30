@@ -41,7 +41,7 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [token]);
+  }, [fetchProducts]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
