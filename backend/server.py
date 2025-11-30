@@ -460,7 +460,7 @@ async def generate_sku(category: str) -> str:
             try:
                 num = int(prod['sku'].split('-')[-1])
                 numbers.append(num)
-            except:
+            except (ValueError, IndexError):
                 continue
         next_number = max(numbers) + 1 if numbers else 1
     
