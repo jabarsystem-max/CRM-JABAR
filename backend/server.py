@@ -421,12 +421,50 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 # ============================================================================
 
 def calculate_stock_status(quantity: int, min_stock: int) -> str:
+    """Calculate stock status based on quantity and min_stock threshold"""
     if quantity == 0:
         return "Out"
     elif quantity < min_stock:
         return "Low"
     else:
         return "OK"
+
+async def generate_sku(category: str) -> str:
+    """Generate automatic SKU in format: ZV-<CAT>-<number>"""
+    # Category code mapping
+    category_codes = {
+        'vitamin': 'VIT',
+        'mineral': 'MIN',
+        'supplement': 'SUP',
+        'omega': 'OME',
+        'probiotic': 'PRO',
+        'herbal': 'HRB',
+        'protein': 'PRT',
+        'other': 'OTH'
+    }
+    
+    cat_code = category_codes.get(category.lower(), 'PRD')
+    
+    # Find highest existing number for this category
+    existing_products = await db.products.find(
+        {"sku": {"$regex": f"^ZV-{cat_code}-"}},
+        {"_id": 0, "sku": 1}
+    ).to_list(1000)
+    
+    if not existing_products:
+        next_number = 1
+    else:
+        # Extract numbers from SKUs
+        numbers = []
+        for prod in existing_products:
+            try:
+                num = int(prod['sku'].split('-')[-1])
+                numbers.append(num)
+            except:
+                continue
+        next_number = max(numbers) + 1 if numbers else 1
+    
+    return f"ZV-{cat_code}-{next_number:03d}"
 
 async def update_stock_status(product_id: str):
     """Update stock status based on current quantity"""
