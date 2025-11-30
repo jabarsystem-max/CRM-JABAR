@@ -1010,18 +1010,37 @@ async def get_products(current_user: User = Depends(get_current_user)):
 
 @api_router.post("/products", response_model=Product, status_code=status.HTTP_201_CREATED)
 async def create_product(product_create: ProductCreate, current_user: User = Depends(get_current_user)):
-    # Check for duplicate SKU
-    existing = await db.products.find_one({"sku": product_create.sku}, {"_id": 0})
-    if existing:
-        raise HTTPException(status_code=400, detail=f"Product with SKU '{product_create.sku}' already exists")
+    # Validate required fields
+    if len(product_create.name) < 2:
+        raise HTTPException(status_code=400, detail="Product name must be at least 2 characters")
     
-    product = Product(**product_create.model_dump())
+    if product_create.price < 0:
+        raise HTTPException(status_code=400, detail="Price cannot be negative")
+    
+    if product_create.cost < 0:
+        raise HTTPException(status_code=400, detail="Cost cannot be negative")
+    
+    if product_create.min_stock < 0:
+        raise HTTPException(status_code=400, detail="Minimum stock must be positive")
+    
+    # Validate EAN if provided
+    if product_create.ean and not product_create.ean.isdigit():
+        raise HTTPException(status_code=400, detail="EAN must contain only digits")
+    
+    # Generate SKU automatically
+    sku = await generate_sku(product_create.category)
+    
+    # Create product with generated SKU
+    product_data = product_create.model_dump()
+    product_data['sku'] = sku
+    product = Product(**product_data)
+    
     doc = product.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.products.insert_one(doc)
     
-    # Create stock entry
-    stock = Stock(product_id=product.id, quantity=0)
+    # Create stock entry with min_stock from product
+    stock = Stock(product_id=product.id, quantity=0, min_stock=product_create.min_stock)
     stock_doc = stock.model_dump()
     stock_doc['last_updated'] = stock_doc['last_updated'].isoformat()
     await db.stock.insert_one(stock_doc)
