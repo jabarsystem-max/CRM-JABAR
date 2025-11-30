@@ -108,6 +108,8 @@ const Products = () => {
       active: true
     });
     setError('');
+    setSelectedFile(null);
+    setUploadingImage(false);
   };
 
   const handleChange = (e) => {
