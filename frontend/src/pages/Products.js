@@ -84,36 +84,55 @@ const Products = () => {
         </button>
       </div>
 
-      <div className="grid">
+      <div className="product-grid">
         {products.map(product => (
-          <div key={product.id} className="card-item">
-            <div className="card-header">
-              <h3 className="card-title">{product.name}</h3>
-              <span className={`badge badge-${product.color}`}>{product.category}</span>
+          <div 
+            key={product.id} 
+            className="product-card" 
+            onClick={() => {
+              setEditingProduct(product);
+              setFormData({
+                name: product.name,
+                sku: product.sku,
+                category: product.category,
+                price: product.price,
+                cost: product.cost,
+                description: product.description || '',
+                min_stock: product.min_stock || 80,
+                supplier_id: product.supplier_id || ''
+              });
+              setShowModal(true);
+            }}
+          >
+            <div className="product-card-header">
+              <h3 className="product-card-title">{product.name}</h3>
+              <span className={`product-badge badge-${product.category === 'vitamin' ? 'success' : product.category === 'mineral' ? 'warning' : 'omega'}`}>
+                {product.category}
+              </span>
             </div>
-            <p className="card-text">{product.description}</p>
-            <div className="card-stats">
-              <div className="stat">
-                <span className="stat-label">SKU</span>
-                <span className="stat-value">{product.sku}</span>
+            
+            <div className="product-card-body">
+              <div className="product-card-price">
+                <span className="price-label">Salgspris</span>
+                <span className="price-value">{product.price} kr</span>
               </div>
-              <div className="stat">
-                <span className="stat-label">Salgspris</span>
-                <span className="stat-value">{product.price} kr</span>
+              
+              <div className="product-card-meta">
+                <div className="meta-item">
+                  <span className="meta-label">SKU:</span>
+                  <span className="meta-value">{product.sku}</span>
+                </div>
+                <div className="meta-item">
+                  <span className="meta-label">Kostpris:</span>
+                  <span className="meta-value">{product.cost} kr</span>
+                </div>
               </div>
-              <div className="stat">
-                <span className="stat-label">Innkjøpspris</span>
-                <span className="stat-value">{product.cost} kr</span>
-              </div>
-              <div className="stat">
-                <span className="stat-label">Min. lager</span>
-                <span className="stat-value">{product.min_stock || 80} stk</span>
-              </div>
-              <div className="stat">
-                <span className="stat-label">Status</span>
-                <span className={`badge badge-${product.stock_status === 'OK' ? 'success' : product.stock_status === 'Low' ? 'warning' : 'danger'}`}>
+              
+              <div className="product-card-footer">
+                <span className={`status-badge status-${product.stock_status === 'OK' ? 'ok' : product.stock_status === 'Low' ? 'low' : 'out'}`}>
                   {product.stock_status || 'OK'}
                 </span>
+                <span className="stock-info">Min: {product.min_stock || 80} stk</span>
               </div>
             </div>
           </div>
