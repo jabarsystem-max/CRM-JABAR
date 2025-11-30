@@ -271,7 +271,10 @@ const Products = () => {
                 </select>
               </div>
               <div className="modal-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
+                <button type="button" className="btn-secondary" onClick={() => {
+                  setShowModal(false);
+                  setEditingProduct(null);
+                }}>
                   Avbryt
                 </button>
                 <button type="submit" className="btn-primary">
