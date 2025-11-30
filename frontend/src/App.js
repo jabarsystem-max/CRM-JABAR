@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
+import ProductDetail from './pages/ProductDetail';
 import Stock from './pages/Stock';
 import StockMovements from './pages/StockMovements';
 import Orders from './pages/Orders';
