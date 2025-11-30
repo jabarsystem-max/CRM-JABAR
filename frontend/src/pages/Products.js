@@ -37,6 +37,8 @@ const Products = () => {
   const [suppliers, setSuppliers] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [error, setError] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const fetchProducts = useCallback(async () => {
     try {
