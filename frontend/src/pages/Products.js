@@ -163,7 +163,10 @@ const Products = () => {
       </div>
 
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+        <div className="modal-overlay" onClick={() => {
+          setShowModal(false);
+          setEditingProduct(null);
+        }}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <h2 className="modal-title">{editingProduct ? 'Rediger produkt' : 'Nytt produkt'}</h2>
             <form onSubmit={handleSubmit} className="modal-form">
