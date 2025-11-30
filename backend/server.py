@@ -1100,6 +1100,38 @@ async def delete_product(product_id: str, current_user: User = Depends(get_curre
     return None
 
 
+@api_router.post("/upload-image")
+async def upload_image(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
+    """Upload a product image and return the URL"""
+    try:
+        # Validate file type
+        allowed_types = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
+        if file.content_type not in allowed_types:
+            raise HTTPException(status_code=400, detail="Invalid file type. Only JPEG, PNG, and WebP are allowed.")
+        
+        # Create uploads directory if it doesn't exist
+        upload_dir = Path("/app/backend/uploads/products")
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Generate unique filename
+        file_ext = file.filename.split(".")[-1]
+        unique_filename = f"{uuid.uuid4()}.{file_ext}"
+        file_path = upload_dir / unique_filename
+        
+        # Save file
+        async with aiofiles.open(file_path, 'wb') as out_file:
+            content = await file.read()
+            await out_file.write(content)
+        
+        # Return the relative URL
+        image_url = f"/uploads/products/{unique_filename}"
+        return {"image_url": image_url, "message": "Image uploaded successfully"}
+    
+    except Exception as e:
+        logging.error(f"Error uploading image: {e}")
+        raise HTTPException(status_code=500, detail=f"Error uploading image: {str(e)}")
+
+
 # Continuing in next part due to size...
 # The file continues with STOCK, SUPPLIERS, PURCHASES, CUSTOMERS, ORDERS, TASKS, EXPENSES, DASHBOARD, and REPORTS routes
 
