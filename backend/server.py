@@ -2011,7 +2011,7 @@ async def run_low_stock_automation(current_user: User = Depends(get_current_user
             tasks_created += 1
     
     return {
-        "message": f"Low stock automation completed",
+        "message": "Low stock automation completed",
         "low_stock_items": len(stock_items),
         "tasks_created": tasks_created
     }
