@@ -88,7 +88,21 @@ const Products = () => {
           <h1 className="page-title">💊 Produkter</h1>
           <p className="page-subtitle">Administrer alle ZenVit-produkter</p>
         </div>
-        <button className="btn-primary" onClick={() => setShowModal(true)}>
+        <button className="btn-primary" onClick={() => {
+          setEditingProduct(null);
+          setFormData({
+            name: '',
+            description: '',
+            category: 'vitamin',
+            sku: '',
+            price: '',
+            cost: '',
+            min_stock: 80,
+            supplier_id: '',
+            color: 'omega'
+          });
+          setShowModal(true);
+        }}>
           + Nytt produkt
         </button>
       </div>
