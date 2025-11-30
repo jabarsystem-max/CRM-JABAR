@@ -1762,7 +1762,7 @@ async def get_dashboard(current_user: User = Depends(get_current_user)):
     all_tasks = await db.tasks.find({"status": {"$ne": "Done"}}, {"_id": 0}).to_list(1000)
     for t in all_tasks:
         if t.get('due_date') and isinstance(t['due_date'], str):
-            t['due_date'] = datetime.fromisoformat(t['due_date'])
+            t['due_date'] = datetime.fromisoformat(t['due_date']).replace(tzinfo=timezone.utc)
     
     today_tasks = [t for t in all_tasks if t.get('due_date') and t['due_date'].date() == datetime.now(timezone.utc).date()][:3]
     week_end = datetime.now(timezone.utc) + timedelta(days=7)
