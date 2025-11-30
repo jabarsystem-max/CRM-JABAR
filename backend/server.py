@@ -1049,17 +1049,34 @@ async def create_product(product_create: ProductCreate, current_user: User = Dep
 
 @api_router.put("/products/{product_id}", response_model=Product)
 async def update_product(product_id: str, product_update: ProductCreate, current_user: User = Depends(get_current_user)):
-    # Check for duplicate SKU (excluding current product)
-    existing = await db.products.find_one({
-        "sku": product_update.sku,
-        "id": {"$ne": product_id}
-    }, {"_id": 0})
-    if existing:
-        raise HTTPException(status_code=400, detail=f"Product with SKU '{product_update.sku}' already exists")
+    # Validate fields
+    if len(product_update.name) < 2:
+        raise HTTPException(status_code=400, detail="Product name must be at least 2 characters")
+    
+    if product_update.price < 0:
+        raise HTTPException(status_code=400, detail="Price cannot be negative")
+    
+    if product_update.cost < 0:
+        raise HTTPException(status_code=400, detail="Cost cannot be negative")
+    
+    if product_update.min_stock < 0:
+        raise HTTPException(status_code=400, detail="Minimum stock must be positive")
+    
+    if product_update.ean and not product_update.ean.isdigit():
+        raise HTTPException(status_code=400, detail="EAN must contain only digits")
+    
+    # Get current product to preserve SKU
+    current_product = await db.products.find_one({"id": product_id}, {"_id": 0})
+    if not current_product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    # Preserve the existing SKU (don't allow changing it)
+    update_data = product_update.model_dump()
+    update_data['sku'] = current_product['sku']
     
     result = await db.products.update_one(
         {"id": product_id},
-        {"$set": product_update.model_dump()}
+        {"$set": update_data}
     )
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Product not found")
