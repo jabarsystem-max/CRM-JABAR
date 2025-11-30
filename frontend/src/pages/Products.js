@@ -41,7 +41,7 @@ const Products = () => {
 
   useEffect(() => {
     if (token) {
-      fetchProducts();
+      fetchProducts(); // eslint-disable-line react-hooks/set-state-in-effect
     }
   }, [token, fetchProducts]);
 
