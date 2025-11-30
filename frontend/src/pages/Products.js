@@ -22,6 +22,7 @@ const Products = () => {
     color: 'omega'
   });
   const [suppliers, setSuppliers] = useState([]);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   const fetchProducts = async () => {
     try {
