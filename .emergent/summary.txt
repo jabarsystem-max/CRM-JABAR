@@ -1,246 +1,155 @@
 <analysis>**original_problem_statement:**
-The user wants to build a CRM system. The initial request was Vi skal bygge et crm system nå (We will build a CRM system now). The user provided a React component and CSS for a dashboard named ZenVitDashboard as a design reference. Subsequently, the user provided a very detailed and comprehensive schema for a full-fledged CRM, covering modules like Products, Stock, Orders, Customers, Tasks, Expenses, Reports, and more, and requested a full implementation of this system.
+The user initially requested the creation of a comprehensive CRM system named ZenVit. After the initial build-out of the backend and frontend for multiple modules (Dashboard, Customers, Orders, etc.), the user provided a new, very detailed set of requirements for a complete overhaul of the **Product Module**.
 
-**PRODUCT REQUIREMENTS:**
-- A full-stack CRM application with a FastAPI backend and React frontend.
-- User authentication (email/password JWT).
-- A comprehensive backend supporting ~16 data models as per the detailed schema.
-- A complete frontend with dedicated pages for each module: Dashboard, Customers, Products, Stock, Orders, Purchases, Tasks, Expenses, Reports, and Search.
-- The system should be pre-populated with realistic test data for ZenVit.
+**PRODUCT REQUIREMENTS (Current, In-Progress):**
+The user wants a complete upgrade of the product module in one single operation. This includes:
+1.  **Upgraded New/Edit Product Form**: A comprehensive two-column form including fields for detailed descriptions (Markdown), categories, subcategories, brand, EAN, packaging info, weight, pricing, supplier, product color, tags, status, and image uploads with a preview.
+2.  **Automatic SKU Generator**: Backend logic to generate SKUs in the format .
+3.  **New Product Card Layout**: A responsive grid showing 4 cards per row on desktop, becoming more compact on smaller screens. Cards should be clickable.
+4.  **Product Detail Page**: A new page displayed upon clicking a product card, showing the full product details, images, and a history of stock movements.
+5.  **Image Upload Support**: Full implementation for uploading, storing, and displaying product images.
+6.  **Enhanced Validation**: Stricter backend and frontend validation for fields like unique SKU, EAN, negative prices, and required fields.
 
 **User's preferred language**: Norwegian. The next agent MUST respond in Norwegian.
 
 **what currently exists?**
-The project is a full-stack application.
-- **Backend**: A single, large  file contains a complete FastAPI backend. It defines ~16 Pydantic models matching the user's detailed CRM schema, along with corresponding API endpoints for full CRUD functionality. JWT authentication is implemented. There is a function () to populate the database, but the endpoint to trigger it is not working correctly.
-- **Frontend**: The basic structure for the frontend is in place.  is set up for navigation. An  handles login state. Placeholder component files have been created for all required CRM pages (, , , etc.), but they are not yet implemented with actual UI and logic. The main  component includes a sidebar with navigation links to all these pages.
+The application is a full-stack CRM with a FastAPI backend and a React frontend. The agent has successfully completed the initial version of the CRM, including a dashboard, and pages for customers, orders, stock, tasks, expenses, and reports, along with a settings page for theme and user profile management.
+
+Currently, the agent is in the middle of a major overhaul of the product module.
+-   **Backend ()**: The  Pydantic model has been updated with all the new fields. A new SKU-generation function () has been implemented and integrated into the  endpoint. The  and  endpoints have been modified to support the new model and add validation. A new endpoint to fetch product details () has also been added.
+-   **Frontend**: The frontend implementation is partially complete. The old  file has been completely replaced with a new version containing the large, complex form for creating and editing products. A new stylesheet, , was created for this form. Additionally, new placeholder files for the product detail view (, ) have been created but are not yet integrated.
 
 **Last working item**:
--   **Last item agent was working**: The agent was about to start the implementation of the main **Dashboard** page (). This is part of the user's broader request to build out the entire frontend for all CRM modules.
--   **Status**: NOT STARTED
--   **Agent Testing Done**: N
--   **Which testing method agent to use?**: Frontend testing agent. After completing the Dashboard and other pages, the agent should instruct the testing agent to log in ( / ) and verify that all pages render data correctly.
+-   **Last item agent was working**: Implementing the major Product Module overhaul. The agent just completed writing the new  file (which now contains the large product creation/editing form) and its corresponding CSS (). It also created placeholder files for the  page.
+-   **Status**: **IN PROGRESS**
+-   **Agent Testing Done**: N (The new product module code has not been tested at all).
+-   **Which testing method agent to use?**: **Frontend testing agent**. This is a large feature change that requires a comprehensive E2E test of the entire product module workflow: creating a new product with an image, viewing it in the updated grid, clicking the card to see the detail page, and editing the product.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1**: Data seeding endpoint is not working. (Priority: P0)
--   **Issue 2**: Backend logs show a  attribute error. (Priority: P2)
-
-**Issues Detail:**
--   **Issue 1: Data seeding endpoint is not working.**
-    -   **Attempted fixes**: The agent tried  on  and  but received Not Found and Internal Server Error responses. The agent did not investigate the logs for the internal error and moved on.
-    -   **Next debug checklist**:
-        1.  Examine  to confirm the exact path of the seeding endpoint router (it appears to be ).
-        2.  Restart the backend and attempt to call {"detail":"Not Found"} again, this time with the correct auth token.
-        3.  If it fails, immediately check the backend error logs (  {'type': 'missing', 'loc': ('response', 0, 'Name'), 'msg': 'Field required', 'input': {'id': 'c82026c9-041b-4003-a60a-71f02a303afb', 'name': 'D3 + K2 Premium', 'description': 'Vitamin D3 5000 IU + K2 MK-7 200 mcg', 'category': 'vitamin', 'sku': 'ZV-D3K2-001', 'price': 299.0, 'cost': 89.0, 'min_stock': 100, 'stock_status': 'OK', 'supplier_id': 'a590dd3d-6408-437b-8a77-c371fd004dda', 'color': 'd3', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571490, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 0, 'Category'), 'msg': 'Field required', 'input': {'id': 'c82026c9-041b-4003-a60a-71f02a303afb', 'name': 'D3 + K2 Premium', 'description': 'Vitamin D3 5000 IU + K2 MK-7 200 mcg', 'category': 'vitamin', 'sku': 'ZV-D3K2-001', 'price': 299.0, 'cost': 89.0, 'min_stock': 100, 'stock_status': 'OK', 'supplier_id': 'a590dd3d-6408-437b-8a77-c371fd004dda', 'color': 'd3', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571490, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 0, 'CostPrice'), 'msg': 'Field required', 'input': {'id': 'c82026c9-041b-4003-a60a-71f02a303afb', 'name': 'D3 + K2 Premium', 'description': 'Vitamin D3 5000 IU + K2 MK-7 200 mcg', 'category': 'vitamin', 'sku': 'ZV-D3K2-001', 'price': 299.0, 'cost': 89.0, 'min_stock': 100, 'stock_status': 'OK', 'supplier_id': 'a590dd3d-6408-437b-8a77-c371fd004dda', 'color': 'd3', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571490, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 0, 'SalePrice'), 'msg': 'Field required', 'input': {'id': 'c82026c9-041b-4003-a60a-71f02a303afb', 'name': 'D3 + K2 Premium', 'description': 'Vitamin D3 5000 IU + K2 MK-7 200 mcg', 'category': 'vitamin', 'sku': 'ZV-D3K2-001', 'price': 299.0, 'cost': 89.0, 'min_stock': 100, 'stock_status': 'OK', 'supplier_id': 'a590dd3d-6408-437b-8a77-c371fd004dda', 'color': 'd3', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571490, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 1, 'SKU'), 'msg': 'Field required', 'input': {'id': '2e0a71f6-cbd1-451d-b5ea-0e1f20d94a75', 'name': 'Omega-3 Triglyceride', 'description': 'EPA 1000mg + DHA 500mg per serving', 'category': 'supplement', 'sku': 'ZV-OM3-001', 'price': 349.0, 'cost': 95.0, 'min_stock': 150, 'stock_status': 'OK', 'supplier_id': 'a590dd3d-6408-437b-8a77-c371fd004dda', 'color': 'omega', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571498, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 1, 'Name'), 'msg': 'Field required', 'input': {'id': '2e0a71f6-cbd1-451d-b5ea-0e1f20d94a75', 'name': 'Omega-3 Triglyceride', 'description': 'EPA 1000mg + DHA 500mg per serving', 'category': 'supplement', 'sku': 'ZV-OM3-001', 'price': 349.0, 'cost': 95.0, 'min_stock': 150, 'stock_status': 'OK', 'supplier_id': 'a590dd3d-6408-437b-8a77-c371fd004dda', 'color': 'omega', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571498, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 1, 'Category'), 'msg': 'Field required', 'input': {'id': '2e0a71f6-cbd1-451d-b5ea-0e1f20d94a75', 'name': 'Omega-3 Triglyceride', 'description': 'EPA 1000mg + DHA 500mg per serving', 'category': 'supplement', 'sku': 'ZV-OM3-001', 'price': 349.0, 'cost': 95.0, 'min_stock': 150, 'stock_status': 'OK', 'supplier_id': 'a590dd3d-6408-437b-8a77-c371fd004dda', 'color': 'omega', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571498, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 1, 'CostPrice'), 'msg': 'Field required', 'input': {'id': '2e0a71f6-cbd1-451d-b5ea-0e1f20d94a75', 'name': 'Omega-3 Triglyceride', 'description': 'EPA 1000mg + DHA 500mg per serving', 'category': 'supplement', 'sku': 'ZV-OM3-001', 'price': 349.0, 'cost': 95.0, 'min_stock': 150, 'stock_status': 'OK', 'supplier_id': 'a590dd3d-6408-437b-8a77-c371fd004dda', 'color': 'omega', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571498, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 1, 'SalePrice'), 'msg': 'Field required', 'input': {'id': '2e0a71f6-cbd1-451d-b5ea-0e1f20d94a75', 'name': 'Omega-3 Triglyceride', 'description': 'EPA 1000mg + DHA 500mg per serving', 'category': 'supplement', 'sku': 'ZV-OM3-001', 'price': 349.0, 'cost': 95.0, 'min_stock': 150, 'stock_status': 'OK', 'supplier_id': 'a590dd3d-6408-437b-8a77-c371fd004dda', 'color': 'omega', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571498, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 2, 'SKU'), 'msg': 'Field required', 'input': {'id': '38ec7125-fe01-4f33-96f8-c1a6d504aa1d', 'name': 'Magnesium Glysinat 400mg', 'description': 'Høyt biotilgjengelig magnesium', 'category': 'mineral', 'sku': 'ZV-MAG-001', 'price': 249.0, 'cost': 72.0, 'min_stock': 120, 'stock_status': 'OK', 'supplier_id': '2e09b4ab-dce4-45b9-b2ac-84aa529d22b5', 'color': 'mag', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571504, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 2, 'Name'), 'msg': 'Field required', 'input': {'id': '38ec7125-fe01-4f33-96f8-c1a6d504aa1d', 'name': 'Magnesium Glysinat 400mg', 'description': 'Høyt biotilgjengelig magnesium', 'category': 'mineral', 'sku': 'ZV-MAG-001', 'price': 249.0, 'cost': 72.0, 'min_stock': 120, 'stock_status': 'OK', 'supplier_id': '2e09b4ab-dce4-45b9-b2ac-84aa529d22b5', 'color': 'mag', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571504, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 2, 'Category'), 'msg': 'Field required', 'input': {'id': '38ec7125-fe01-4f33-96f8-c1a6d504aa1d', 'name': 'Magnesium Glysinat 400mg', 'description': 'Høyt biotilgjengelig magnesium', 'category': 'mineral', 'sku': 'ZV-MAG-001', 'price': 249.0, 'cost': 72.0, 'min_stock': 120, 'stock_status': 'OK', 'supplier_id': '2e09b4ab-dce4-45b9-b2ac-84aa529d22b5', 'color': 'mag', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571504, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 2, 'CostPrice'), 'msg': 'Field required', 'input': {'id': '38ec7125-fe01-4f33-96f8-c1a6d504aa1d', 'name': 'Magnesium Glysinat 400mg', 'description': 'Høyt biotilgjengelig magnesium', 'category': 'mineral', 'sku': 'ZV-MAG-001', 'price': 249.0, 'cost': 72.0, 'min_stock': 120, 'stock_status': 'OK', 'supplier_id': '2e09b4ab-dce4-45b9-b2ac-84aa529d22b5', 'color': 'mag', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571504, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 2, 'SalePrice'), 'msg': 'Field required', 'input': {'id': '38ec7125-fe01-4f33-96f8-c1a6d504aa1d', 'name': 'Magnesium Glysinat 400mg', 'description': 'Høyt biotilgjengelig magnesium', 'category': 'mineral', 'sku': 'ZV-MAG-001', 'price': 249.0, 'cost': 72.0, 'min_stock': 120, 'stock_status': 'OK', 'supplier_id': '2e09b4ab-dce4-45b9-b2ac-84aa529d22b5', 'color': 'mag', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571504, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 3, 'SKU'), 'msg': 'Field required', 'input': {'id': '06733551-27ae-4104-9b1e-ea76d95b4283', 'name': 'C-vitamin + Sink', 'description': 'Vitamin C 1000mg + Sink 15mg', 'category': 'vitamin', 'sku': 'ZV-Cznc-001', 'price': 199.0, 'cost': 58.0, 'min_stock': 100, 'stock_status': 'OK', 'supplier_id': '2e09b4ab-dce4-45b9-b2ac-84aa529d22b5', 'color': 'csink', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571509, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 3, 'Name'), 'msg': 'Field required', 'input': {'id': '06733551-27ae-4104-9b1e-ea76d95b4283', 'name': 'C-vitamin + Sink', 'description': 'Vitamin C 1000mg + Sink 15mg', 'category': 'vitamin', 'sku': 'ZV-Cznc-001', 'price': 199.0, 'cost': 58.0, 'min_stock': 100, 'stock_status': 'OK', 'supplier_id': '2e09b4ab-dce4-45b9-b2ac-84aa529d22b5', 'color': 'csink', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571509, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 3, 'Category'), 'msg': 'Field required', 'input': {'id': '06733551-27ae-4104-9b1e-ea76d95b4283', 'name': 'C-vitamin + Sink', 'description': 'Vitamin C 1000mg + Sink 15mg', 'category': 'vitamin', 'sku': 'ZV-Cznc-001', 'price': 199.0, 'cost': 58.0, 'min_stock': 100, 'stock_status': 'OK', 'supplier_id': '2e09b4ab-dce4-45b9-b2ac-84aa529d22b5', 'color': 'csink', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571509, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 3, 'CostPrice'), 'msg': 'Field required', 'input': {'id': '06733551-27ae-4104-9b1e-ea76d95b4283', 'name': 'C-vitamin + Sink', 'description': 'Vitamin C 1000mg + Sink 15mg', 'category': 'vitamin', 'sku': 'ZV-Cznc-001', 'price': 199.0, 'cost': 58.0, 'min_stock': 100, 'stock_status': 'OK', 'supplier_id': '2e09b4ab-dce4-45b9-b2ac-84aa529d22b5', 'color': 'csink', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571509, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-  {'type': 'missing', 'loc': ('response', 3, 'SalePrice'), 'msg': 'Field required', 'input': {'id': '06733551-27ae-4104-9b1e-ea76d95b4283', 'name': 'C-vitamin + Sink', 'description': 'Vitamin C 1000mg + Sink 15mg', 'category': 'vitamin', 'sku': 'ZV-Cznc-001', 'price': 199.0, 'cost': 58.0, 'min_stock': 100, 'stock_status': 'OK', 'supplier_id': '2e09b4ab-dce4-45b9-b2ac-84aa529d22b5', 'color': 'csink', 'active': True, 'created_at': datetime.datetime(2025, 11, 29, 12, 25, 28, 571509, tzinfo=datetime.timezone.utc)}, 'url': 'https://errors.pydantic.dev/2.12/v/missing'}
-
-WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [678]
-INFO:     Started server process [833]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [833]
-INFO:     Stopping reloader process [676]
-INFO:     Will watch for changes in these directories: ['/app/backend']
-INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     Started reloader process [838] using WatchFiles
-INFO:     Started server process [840]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-2025-11-29 12:26:27,364 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.venv/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-WARNING:  WatchFiles detected changes in 'server_backup.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [840]
-INFO:     Started server process [910]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [910]
-ERROR:    Error loading ASGI app. Could not import module "server".
-WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
-INFO:     Started server process [952]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [952]
-INFO:     Started server process [983]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [983]
-INFO:     Stopping reloader process [838]
-INFO:     Will watch for changes in these directories: ['/app/backend']
-INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     Started reloader process [1006] using WatchFiles
-INFO:     Started server process [1008]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-2025-11-29 12:42:39,959 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.venv/lib/python3.11/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     Will watch for changes in these directories: ['/app/backend']
-INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     Started reloader process [30] using WatchFiles
-INFO:     Started server process [88]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Will watch for changes in these directories: ['/app/backend']
-INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     Started reloader process [35] using WatchFiles
-INFO:     Started server process [73]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.) for the traceback. The error is likely within the  function itself.
-    -   **Why fix this issue and what will be achieved with the fix?**: This is a critical blocker. Without seed data, the frontend pages cannot be tested or verified, as they will have no data to display.
-    -   **Status**: NOT STARTED
-    -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Backend
-    -   **Blocked on other issue**: None
-
--   **Issue 2: Backend logs show a  attribute error.**
-    -   **Attempted fixes**: None. The agent dismissed it as a non-critical warning.
-    -   **Next debug checklist**:
-        1.  Check the installed version of  in .
-        2.  Investigate if this version has known compatibility issues with the Python or  version being used.
-        3.  The error  might indicate a problem during package installation or a dependency conflict. Consider reinstalling dependencies.
-    -   **Why fix this issue and what will be achieved with this?**: While login currently works, this error could point to an underlying issue with the hashing library that might cause authentication problems in the future. Fixing it ensures robust security.
-    -   **Status**: NOT STARTED
-    -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Backend
-    -   **Blocked on other issue**: None
+There are no known bugs. The only issue is that the primary task is a large, unfinished feature implementation.
 
 **In progress Task List**:
--   **Task 1**: Complete the implementation of the entire CRM frontend. (Priority: P0)
+-   **Task 1**: Complete the full Product Module Overhaul (Priority: **P0**)
 
 **Task Detail:**
--   **Task 1: Complete the implementation of the entire CRM frontend.**
-    -   **Where to resume**: Start with . Implement the full UI as per the user's detailed schema (TopPanel, Tasks, Graphs, Products, Customers widgets). After the dashboard, proceed to implement the remaining pages one by one: , , , , , , , and . Each page should fetch data from the corresponding backend API, display it in a clean interface (tables, cards, forms), and handle user interactions.
-    -   **What will be achieved with this?**: A fully functional and interactive CRM frontend that allows the user to view and manage their business data.
-    -   **Status**: IN PROGRESS
+-   **Task 1: Complete the full Product Module Overhaul**
+    -   **Where to resume**: The agent just created the new  and  files. The immediate next steps are:
+        1.  **Implement Routing**: In , add a new route  that renders the  component.
+        2.  **Implement Navigation**: In the updated , make the product cards clickable so they navigate to the correct  URL.
+        3.  **Complete Product Detail Page**: Implement the logic and UI in  to fetch and display all product data, including stock movements, from the  endpoint.
+        4.  **Implement Image Upload**: The backend model has an  field, but the upload logic is missing. Implement an endpoint (e.g., ) to handle file uploads and save them. Update the frontend form in  to use this endpoint, including the image preview.
+        5.  **Thorough Testing**: After implementation, perform a full end-to-end test of the entire product module.
+    -   **What will be achieved with this?**: A complete, modern, and professional product module that meets all of the user's detailed specifications.
+    -   **Status**: **IN PROGRESS**
     -   **Should Test frontend/backend/both after fix?**: Both
-    -   **Blocked on something**: **Issue 1 (Data seeding)**. The frontend implementation cannot be fully tested without data.
+    -   **Blocked on something**: No.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    1.  **(P0) Full End-to-End Testing**: Once the frontend is implemented and data seeding works, conduct a full test of the application. This includes logging in, verifying all dashboard widgets, and performing CRUD operations in each module.
-    2.  **(P1) Implement Backend **: Implement the backend logic for the automation rules defined in the user's schema (e.g., create a task when stock is low).
+    1.  **(P1) Email Notifications**: The backend has a basic framework for sending emails ( installed, helper functions created), but the SMTP configuration is missing and it's disabled. This needs to be fully configured and integrated with automations.
 -   **Future Tasks**:
-    1.  **(P2) Implement Global **: Wire up the frontend search page () to the backend  endpoint to enable searching across multiple CRM models.
-    2.  **(P3) Implement  Page**: Build the settings page for managing theme colors and user profiles.
+    1.  **(P2) Further Code Cleanup & Optimization**: The user requested a final round of optimization. While some work was done (DB indexes, ), the monolithic  could be broken down into smaller modules (, , ).
 
 **Completed work in this session**
--   **Backend Architecture**: Implemented a complete FastAPI backend in  with ~16 Pydantic models and corresponding API endpoints for a comprehensive CRM system.
--   **Authentication**: Integrated JWT-based user authentication (, ).
--   **Frontend Scaffolding**: Created placeholder React components for all required CRM pages and set up routing in  and .
+-   **Critical Bug Fixes**:
+    -   Fixed the broken data seeding endpoint (), unblocking all frontend development.
+    -   Resolved all BSON  serialization errors by correctly adding  projections to database queries.
+    -   Implemented a working  API endpoint for manual stock adjustments.
+-   **High-Priority Fixes**:
+    -   Enhanced session management in the frontend to handle token expiry and redirects.
+    -   Added backend validation to prevent duplicate SKUs and user emails.
+    -   Added backend validation to prevent negative amounts in expenses.
+-   **Feature Implementation**:
+    -   Implemented the entire initial frontend for all CRM modules: , , , , , , , and .
+    -   Implemented backend automation logic (e.g., create a task on low stock).
+    -   Implemented a global Search page and API.
+    -   Created a comprehensive  page with Profile, Appearance, and Automation tabs.
+    -   Implemented a full Dark/Light theme toggle mechanism using CSS variables.
+-   **UI/UX and Performance**:
+    -   Implemented a new responsive grid layout for product cards.
+    -   Added database indexes to improve query performance.
+    -   Improved UI with a new header containing a user dropdown and logout button.
+    -   Created several production-readiness documents and scripts.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1**: Data seeding endpoint () is failing with Not Found or Internal Server Error. This is a critical blocker for frontend development and testing.
--   **Issue 2**: A  warning () appears in the backend logs, which was dismissed but could indicate a dependency issue.
+-   None. All identified issues from the agent's self-analysis () were systematically addressed and fixed based on priority.
 
 **Known issue recurrence from previous fork**
--   N/A
+-   None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Backend**: FastAPI, Pydantic, MongoDB (async with ), JWT authentication.
--   **Frontend**: React, , , CSS.
+-   **Backend**: FastAPI, Pydantic, Motor (async MongoDB), JWT, Backend Automations, Database Indexing.
+-   **Frontend**: React, , , CSS Variables for Theming.
+-   **Key Feature**: A highly detailed and dynamic product module with complex forms, image handling, and specific business logic (SKU generation).
 
 **key DB schema**
-The backend uses Pydantic models that map to MongoDB collections. Key models include: , , , , , , , . These models are highly detailed as per the user's specification.
+-   **Product**: The model has been significantly expanded to include:
+    -   ,  (Markdown), , , , , , , , , .
 
 **changes in tech stack**
--   None.
+-    was installed for email notifications, but the feature is not yet fully implemented.
 
 **All files**
--   **/app/backend/server.py**: The core of the application logic. It was completely rewritten to build the entire CRM backend.
--   **/app/frontend/src/App.js**: Updated to include routes for all the new CRM pages.
--   **/app/frontend/src/components/Layout.js**: Updated to provide navigation to all CRM pages.
--   **/app/frontend/src/pages/**: Numerous files were created for each CRM module, but they are currently just placeholders needing implementation.
+-   **/app/backend/server.py**: Heavily modified to include the expanded  model, SKU generator, validation logic, and new endpoints for product details. Now over 2000 lines.
+-   **/app/frontend/src/pages/Products.js**: Completely rewritten to contain the new, large, and complex product creation/editing form.
+-   **/app/frontend/src/pages/ProductDetail.js**: New file created to display detailed product information. (Needs implementation).
+-   **/app/frontend/src/pages/ProductForm.css**: New stylesheet for the complex product form.
+-   **/app/frontend/src/App.js**: Needs to be updated with the route for .
+-   **/app/frontend/src/theme.css**: New file created to manage light and dark theme variables.
+-   **/app/backend/utils/db_indexes.py**: New file to create MongoDB indexes on application startup.
 
 **Areas that need refactoring**:
--   The backend  is over 1100 lines long and contains all models, routes, and business logic. It should be refactored into a modular structure (e.g., , , ) for better maintainability.
+-   **/app/backend/server.py**: This file is now extremely large (over 2000 lines) and contains all models, routes, logic, and helper functions. It is becoming unmaintainable and should be a high-priority candidate for refactoring into a modular structure (e.g., , , ).
 
 **key api endpoints**
--   : User login.
--   : (CRITICAL, NOT WORKING) Populates the database with test data.
--   : Retrieves aggregated data for the main dashboard.
--   Full CRUD endpoints for all models, e.g., , , .
+-   : Heavily updated to handle the new product model and auto-generate SKUs.
+-   : Updated to handle the new fields and validation.
+-   : **New endpoint** to fetch full product data including stock movements.
+-   : New endpoint for manual stock adjustments.
+-   : New endpoint for health checks.
+-   : New endpoint for system statistics.
 
 **Critical Info for New Agent**
--   Your primary focus is to **build the entire frontend**. The user has explicitly requested the full implementation without further pauses or confirmations. Do not modify the backend unless it's to fix a critical bug.
--   **The data seeding endpoint is broken.** You MUST fix this first. Without it, you cannot test your frontend work. Debug the  endpoint by checking  and the backend logs.
--   Follow the detailed CRM schema provided by the user for frontend implementation. Start with the main  page and then implement all other pages.
+-   You are in the middle of a large, user-requested overhaul of the product module. The user's instruction (message 555) was to Complete the entire product module upgrade in one complete round... Notify me when everything is 100% finished.
+-   **Do not stop and ask for confirmation on partial progress.** Your primary goal is to complete the entire feature set described in  and test it thoroughly before reporting back to the user.
+-   Your immediate next step is to implement the routing for the new  page in  and then implement the navigation and logic for that page.
+-   The image upload functionality is a key part of the request and has not been started. You will need to implement both the backend (file upload endpoint) and frontend (form integration).
 
 **documents created in this job**
--   /app/README.md
+-   
+-   
+-   
 
 **Last 5 User Messages and any pending user messages**
-1.  **User**: Requested the full implementation of the backend based on a detailed schema.
-2.  **Agent**: Completed the backend implementation.
-3.  **User**: Approved the backend and requested the **complete frontend implementation** for all modules (dashboard, stock, orders, etc.) without any pauses.
-4.  **Agent**: Acknowledged and started creating placeholder files for the frontend.
-5.  **User**: Reiterated the request to **build the entire frontend** as planned in phases 5-7.
+1.  **User**: Asks the agent to perform a final round of optimization and prepare the system for production. (Completed)
+2.  **User**: Requests a UI change to make product cards smaller, more compact, and arranged in a 4-column responsive grid. (Completed)
+3.  **User**: Provides a very large and detailed specification for a complete overhaul of the product module, requesting it be done in one operation. (In Progress)
+4.  **Agent**: Acknowledges the large request and presents a plan.
+5.  **User**: Confirms the plan and reiterates the instruction to complete the entire implementation and testing in one go before notifying them. (This is the current mandate).
 
 **Project Health Check:**
 -   **Broken**:
-    -   The data seeding functionality is non-operational, which is a **critical blocker** for any frontend work.
-    -   The entire frontend is non-functional, consisting only of placeholder files.
+    -   The entire Product Module is currently broken and non-functional as it is in the middle of a major rewrite.  contains a form that isn't fully wired up, and  is an unimplemented placeholder.
 -   **Mocked**:
-    -   The backend's  function contains extensive logic to create a realistic set of mock data for all CRM modules.
+    -   None.
 
 **Testing status**
--   **Testing agent used after significant changes**: NO
+-   **Testing agent used after significant changes**: YES (for all previously completed features, which all passed).
 -   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: []
--   **Known regressions**: The data seeding functionality, which presumably worked in a simpler form before, is now broken after the major backend rewrite.
+-   **Test files created**: None.
+-   **Known regressions**: The entire product page is non-functional due to the ongoing overhaul.
 
 **Credentials to test flow:**
 -   **Username**: 
 -   **Password**: 
 
 **What agent forgot to execute**
--   The agent completely failed to debug the broken data seeding endpoint. It identified the problem but abandoned the fix, which is a major oversight that blocks all future progress.
--   The agent dismissed a  error in the logs that should have been investigated to ensure long-term stability of the authentication system.</analysis>
+The agent has not forgotten anything but is in the middle of a large task. The critical missing pieces to complete the current user request are:
+-   Routing for the new product detail page.
+-   Implementation of the product detail page UI and logic.
+-   Full implementation of image upload functionality (backend and frontend).
+-   Integration and testing of the complete product module flow.</analysis>

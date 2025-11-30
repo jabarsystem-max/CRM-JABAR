@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 import uuid
 
 # Configuration
-BACKEND_URL = "https://crm-central-24.preview.emergentagent.com/api"
+BACKEND_URL = "https://inventory-zen-1.preview.emergentagent.com/api"
 TEST_CREDENTIALS = {
     "email": "admin@zenvit.no",
     "password": "admin123"
