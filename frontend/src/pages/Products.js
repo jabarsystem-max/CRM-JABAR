@@ -129,6 +129,49 @@ const Products = () => {
     });
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Ugyldig filtype. Kun JPEG, PNG og WebP er tillatt.');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Filen er for stor. Maksimal størrelse er 5MB.');
+      return;
+    }
+
+    setUploadingImage(true);
+    setError('');
+    
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+
+      const response = await axios.post(`${API_URL}/upload-image`, formDataUpload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      // Update form data with the uploaded image URL
+      const imageUrl = `${process.env.REACT_APP_BACKEND_URL}${response.data.image_url}`;
+      setFormData(prev => ({ ...prev, image_url: imageUrl }));
+      setSelectedFile(file);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setError(error.response?.data?.detail || 'Feil ved opplasting av bilde');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const handleDelete = async (id) => {
     if (window.confirm('Er du sikker på at du vil slette dette produktet?')) {
       try {
