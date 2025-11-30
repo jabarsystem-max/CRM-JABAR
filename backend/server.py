@@ -2234,6 +2234,9 @@ async def seed_data():
 # ============================================================================
 app.include_router(api_router)
 
+# Mount static files for uploads
+app.mount("/uploads", StaticFiles(directory="/app/backend/uploads"), name="uploads")
+
 
 app.add_middleware(
     CORSMiddleware,
