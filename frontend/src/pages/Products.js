@@ -278,7 +278,7 @@ const Products = () => {
                   Avbryt
                 </button>
                 <button type="submit" className="btn-primary">
-                  Opprett produkt
+                  {editingProduct ? 'Oppdater produkt' : 'Opprett produkt'}
                 </button>
               </div>
             </form>
