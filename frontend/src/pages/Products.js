@@ -46,10 +46,19 @@ const Products = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/products`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (editingProduct) {
+        // Update existing product
+        await axios.put(`${API_URL}/products/${editingProduct.id}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else {
+        // Create new product
+        await axios.post(`${API_URL}/products`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
       setShowModal(false);
+      setEditingProduct(null);
       setFormData({
         name: '',
         description: '',
@@ -63,8 +72,8 @@ const Products = () => {
       });
       fetchProducts();
     } catch (error) {
-      console.error('Error creating product:', error);
-      alert('Kunne ikke opprette produkt');
+      console.error('Error saving product:', error);
+      alert(editingProduct ? 'Kunne ikke oppdatere produkt' : 'Kunne ikke opprette produkt');
     }
   };
 
