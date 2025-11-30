@@ -24,7 +24,7 @@ const Products = () => {
   const [suppliers, setSuppliers] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const [productsRes, suppliersRes] = await Promise.all([
         axios.get(`${API_URL}/products`, { headers: { Authorization: `Bearer ${token}` } }),
@@ -37,7 +37,7 @@ const Products = () => {
       console.error('Error fetching products:', error);
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchProducts();
