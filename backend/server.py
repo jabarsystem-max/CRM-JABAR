@@ -121,14 +121,35 @@ class Product(BaseModel):
     thumbnail_url: Optional[str] = None
 
 class ProductCreate(BaseModel):
-    sku: str
+    # Basic info
     name: str
+    short_description: Optional[str] = None
+    description: Optional[str] = None
+    full_description: Optional[str] = None
+    
+    # Categorization
     category: str
+    subcategory: Optional[str] = None
+    brand: Optional[str] = None
+    health_areas: Optional[List[str]] = []
+    
+    # Product details
+    ean: Optional[str] = None
+    packaging_type: Optional[str] = None
+    units_per_package: Optional[int] = 1
+    weight_grams: Optional[float] = None
+    
+    # Pricing (required)
     cost: float
     price: float
-    description: Optional[str] = None
+    min_stock: int = 80
+    
+    # Relations
     supplier_id: Optional[str] = None
+    
+    # UI/Display
     color: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 # --- Stock Models ---
