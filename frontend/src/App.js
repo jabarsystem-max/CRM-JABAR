@@ -5,7 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/NewDashboard';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import Stock from './pages/Stock';
