@@ -76,6 +76,13 @@ const TopNav = () => {
 
         {/* Right Section */}
         <div className="top-nav-actions">
+          {/* Date & Time */}
+          <div className="top-nav-datetime">
+            <span className="datetime-text">
+              {currentTime.toLocaleDateString('no-NO', { day: 'numeric', month: 'short' })} {currentTime.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+          
           {/* Search */}
           <div className="search-container">
             {showSearch ? (
