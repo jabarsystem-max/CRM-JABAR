@@ -18,6 +18,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import shutil
 import aiofiles
+import json
 
 
 ROOT_DIR = Path(__file__).parent
