@@ -53,6 +53,7 @@ function App() {
             <Route path="customers" element={<Customers />} />
             <Route path="customers/:id" element={<CustomerDetail />} />
             <Route path="purchases" element={<Purchases />} />
+            <Route path="purchases/new" element={<NewPurchase />} />
             <Route path="suppliers" element={<Suppliers />} />
             <Route path="tasks" element={<Tasks />} />
             <Route path="expenses" element={<Expenses />} />
