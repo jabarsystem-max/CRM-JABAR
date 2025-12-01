@@ -25,12 +25,6 @@ const NewOrder = () => {
     { product_id: '', quantity: 1, price: 0 }
   ]);
 
-  useEffect(() => {
-    if (token) {
-      fetchData();
-    }
-  }, [token]);
-
   const fetchData = async () => {
     try {
       const [customersRes, productsRes] = await Promise.all([
