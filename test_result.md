@@ -546,8 +546,8 @@ frontend:
 
 metadata:
   created_by: "testing_agent"
-  version: "2.1"
-  test_sequence: 3
+  version: "2.2"
+  test_sequence: 4
 
 test_plan:
   current_focus:
