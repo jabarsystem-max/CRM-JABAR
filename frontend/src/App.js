@@ -49,6 +49,7 @@ function App() {
             <Route path="stock" element={<Stock />} />
             <Route path="stock-movements" element={<StockMovements />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="orders/new" element={<NewOrder />} />
             <Route path="customers" element={<Customers />} />
             <Route path="customers/:id" element={<CustomerDetail />} />
             <Route path="purchases" element={<Purchases />} />
