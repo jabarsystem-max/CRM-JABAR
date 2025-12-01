@@ -266,7 +266,7 @@ const Products = () => {
               <div className="product-image-container">
                 {product.image_url || product.thumbnail_url ? (
                   <img 
-                    src={product.thumbnail_url || product.image_url} 
+                    src={`${process.env.REACT_APP_BACKEND_URL}${product.image_url || product.thumbnail_url}`} 
                     alt={product.name}
                     className="product-image"
                     loading="lazy"
