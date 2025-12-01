@@ -1004,12 +1004,24 @@ async def get_me(current_user: User = Depends(get_current_user)):
 # PRODUCT ROUTES  
 # ============================================================================
 
-@api_router.get("/products", response_model=List[Product])
+@api_router.get("/products")
 async def get_products(current_user: User = Depends(get_current_user)):
     products = await db.products.find({}, {"_id": 0}).to_list(1000)
+    
+    # Enrich products with stock information
     for p in products:
         if isinstance(p.get('created_at'), str):
             p['created_at'] = datetime.fromisoformat(p['created_at'])
+        
+        # Get stock information for this product
+        stock = await db.stock.find_one({"product_id": p['id']}, {"_id": 0})
+        if stock:
+            p['current_stock'] = stock.get('quantity', 0)
+            p['stock_status'] = stock.get('status', 'Unknown')
+        else:
+            p['current_stock'] = 0
+            p['stock_status'] = 'Out'
+    
     return products
 
 @api_router.post("/products", response_model=Product, status_code=status.HTTP_201_CREATED)
