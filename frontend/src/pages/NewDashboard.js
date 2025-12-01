@@ -29,6 +29,7 @@ const NewDashboard = () => {
 
   useEffect(() => {
     if (token) {
+      // eslint-disable-next-line
       fetchDashboardData();
     }
   }, [token, fetchDashboardData]);
