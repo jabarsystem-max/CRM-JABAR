@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import DashboardControlPanel from '../components/DashboardControlPanel';
+import CriticalAlertsCard from '../components/CriticalAlertsCard';
 import './NewDashboard.css';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
