@@ -241,47 +241,72 @@ const Products = () => {
       </div>
 
       <div className="product-grid">
-        {products.map(product => (
-          <div 
-            key={product.id} 
-            className="product-card" 
-            onClick={() => navigate(`/products/${product.id}`)}
-          >
-            <div className="product-card-header">
-              {product.image_url || product.thumbnail_url ? (
-                <img 
-                  src={product.thumbnail_url || product.image_url} 
-                  alt={product.name}
-                  className="product-card-image"
-                />
-              ) : (
-                <div className="product-card-image-placeholder">📦</div>
-              )}
-              <span className={`product-badge badge-${product.category}`}>
-                {product.category}
-              </span>
-            </div>
-            
-            <div className="product-card-body">
-              <h3 className="product-card-title">{product.name}</h3>
-              
-              <div className="product-card-price">
-                <span className="price-value">{product.price} kr</span>
+        {products.map(product => {
+          // Calculate stock status and color
+          const currentStock = product.current_stock || 0;
+          const minStock = product.min_stock || 0;
+          let stockStatus = 'normal';
+          let stockColor = '#10b981'; // green
+          
+          if (currentStock === 0) {
+            stockStatus = 'critical';
+            stockColor = '#dc2626'; // red
+          } else if (currentStock <= minStock) {
+            stockStatus = 'low';
+            stockColor = '#f59e0b'; // yellow/orange
+          }
+          
+          return (
+            <div 
+              key={product.id} 
+              className="product-card-modern" 
+              onClick={() => navigate(`/products/${product.id}`)}
+            >
+              {/* Product Image */}
+              <div className="product-image-container">
+                {product.image_url || product.thumbnail_url ? (
+                  <img 
+                    src={product.thumbnail_url || product.image_url} 
+                    alt={product.name}
+                    className="product-image"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="product-image-placeholder">
+                    <span className="placeholder-icon">📦</span>
+                  </div>
+                )}
               </div>
               
-              <div className="product-card-meta">
-                <div className="meta-item">
-                  <span className="meta-label">SKU:</span>
-                  <span className="meta-value">{product.sku}</span>
+              {/* Product Info */}
+              <div className="product-info">
+                <h3 className="product-title">{product.name}</h3>
+                
+                {product.short_description && (
+                  <p className="product-description">{product.short_description}</p>
+                )}
+                
+                {/* Price */}
+                <div className="product-price">
+                  <span className="price-amount">{product.price} kr</span>
                 </div>
-                <div className="meta-item">
-                  <span className="meta-label">Lager:</span>
-                  <span className="meta-value">{product.stock_status || 'OK'}</span>
+                
+                {/* Stock Status */}
+                <div className="product-stock">
+                  <span 
+                    className="stock-indicator" 
+                    style={{ backgroundColor: stockColor }}
+                  ></span>
+                  <span className="stock-text">
+                    {currentStock === 0 ? 'Utsolgt' : 
+                     currentStock <= minStock ? `Lav (${currentStock} stk)` : 
+                     `På lager (${currentStock} stk)`}
+                  </span>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Modal for create/edit */}
