@@ -587,9 +587,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "ZenVit AI-Veileder MVP - COMPREHENSIVE TESTING COMPLETED SUCCESSFULLY"
+    - "Upgraded Product Cards with Apple Clean Style"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
