@@ -63,11 +63,6 @@ const NewDashboard = () => {
 
   return (
     <div className="dashboard-page">
-      <div className="dashboard-header">
-        <h1 className="dashboard-title">Dashboard</h1>
-        <p className="dashboard-subtitle">Oversikt over din virksomhet</p>
-      </div>
-
       {/* Control Panel */}
       {controlPanelData && <DashboardControlPanel data={controlPanelData} />}
 
@@ -75,7 +70,7 @@ const NewDashboard = () => {
       <div className="kpi-grid">
         {/* Row 1 */}
         <div 
-          className="kpi-card" 
+          className="kpi-card kpi-card-green" 
           onClick={() => handleKPIClick('/products')}
         >
           <div className="kpi-icon green">📦</div>
@@ -85,8 +80,8 @@ const NewDashboard = () => {
         </div>
 
         <div 
-          className="kpi-card" 
-          onClick={() => handleKPIClick('/products', { lowStock: true })}
+          className="kpi-card kpi-card-yellow" 
+          onClick={() => handleKPIClick('/products/low-stock', { lowStock: true })}
         >
           <div className="kpi-icon red">⚠️</div>
           <h3 className="kpi-title">Lavt lager</h3>
@@ -95,7 +90,7 @@ const NewDashboard = () => {
         </div>
 
         <div 
-          className="kpi-card" 
+          className="kpi-card kpi-card-blue" 
           onClick={() => handleKPIClick('/orders', { thisMonth: true })}
         >
           <div className="kpi-icon blue">📊</div>
@@ -106,7 +101,7 @@ const NewDashboard = () => {
 
         {/* Row 2 */}
         <div 
-          className="kpi-card" 
+          className="kpi-card kpi-card-purple" 
           onClick={() => handleKPIClick('/purchases', { incoming: true })}
         >
           <div className="kpi-icon purple">🚚</div>
@@ -116,7 +111,7 @@ const NewDashboard = () => {
         </div>
 
         <div 
-          className="kpi-card" 
+          className="kpi-card kpi-card-pink" 
           onClick={() => handleKPIClick('/stock')}
         >
           <div className="kpi-icon yellow">💰</div>
@@ -126,7 +121,7 @@ const NewDashboard = () => {
         </div>
 
         <div 
-          className="kpi-card" 
+          className="kpi-card kpi-card-gray" 
           onClick={() => handleKPIClick('/customers', { active: true })}
         >
           <div className="kpi-icon orange">👥</div>
