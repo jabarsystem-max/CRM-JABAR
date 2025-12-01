@@ -13,6 +13,7 @@ import LowStockProducts from './pages/LowStockProducts';
 import Stock from './pages/Stock';
 import NewOrder from './pages/NewOrder';
 import NewPurchase from './pages/NewPurchase';
+import ZenVitAI from './pages/ZenVitAI';
 import StockMovements from './pages/StockMovements';
 import Orders from './pages/Orders';
 import Customers from './pages/Customers';
