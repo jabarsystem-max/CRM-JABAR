@@ -467,7 +467,12 @@ const EditProduct = () => {
                   {uploadingImage && <p className="upload-status">Laster opp bilde...</p>}
                   {formData.image_url && (
                     <div className="image-preview">
-                      <img src={formData.image_url} alt="Preview" />
+                      <img 
+                        src={formData.image_url.startsWith('/') 
+                          ? `${process.env.REACT_APP_BACKEND_URL}${formData.image_url}` 
+                          : formData.image_url} 
+                        alt="Preview" 
+                      />
                     </div>
                   )}
                 </div>
