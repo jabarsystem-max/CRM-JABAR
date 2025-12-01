@@ -56,6 +56,7 @@ const ZenVitAI = () => {
   ];
 
   const handleExampleClick = (query) => {
+    // Pure React state update - no DOM manipulation
     setCustomerContext(query);
     setRecommendations(null);
     setError('');
