@@ -84,6 +84,21 @@
   flex-shrink: 0;
 }
 
+/* Date & Time */
+.top-nav-datetime {
+  padding: 8px 16px;
+  background: #F9FAFB;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+}
+
+.datetime-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+}
+
 /* Search */
 .search-container {
   position: relative;
