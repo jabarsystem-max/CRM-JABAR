@@ -166,7 +166,7 @@ const ZenVitAI = () => {
                   <h3 className="ai-card-title">🎯 Anbefalte produkter</h3>
                   <div className="ai-products-grid">
                     {recommendations.products.map((product, idx) => (
-                      <div key={idx} className="ai-product-card">
+                      <div key={`product-${idx}-${product.name}`} className="ai-product-card">
                         <div className="ai-product-number">{idx + 1}</div>
                         <div className="ai-product-content">
                           <h4 className="ai-product-name">{product.name}</h4>
