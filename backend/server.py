@@ -1868,6 +1868,63 @@ async def get_dashboard(current_user: User = Depends(get_current_user)):
     }
 
 
+@api_router.get("/dashboard/control-panel")
+async def get_control_panel_data(current_user: User = Depends(get_current_user)):
+    """Get data for the dashboard control panel"""
+    
+    now = datetime.now(timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_start_str = today_start.isoformat()
+    
+    # Alerts
+    low_stock_count = await db.stock.count_documents({"status": {"$in": ["Low", "Out"]}})
+    pending_orders = await db.orders.count_documents({"status": "Pending"})
+    incoming_purchases = await db.purchases.count_documents({"status": {"$in": ["Ordered", "In_Transit"]}})
+    
+    # Today's stats
+    today_orders = await db.orders.find({
+        "date": {"$gte": today_start_str},
+        "status": {"$in": ["Processing", "Packed", "Shipped", "Delivered"]}
+    }, {"_id": 0}).to_list(10000)
+    
+    today_sales = sum(order.get('order_total', 0) for order in today_orders)
+    today_orders_count = len(today_orders)
+    
+    # New purchases today
+    new_purchases_today = await db.purchases.count_documents({
+        "date": {"$gte": today_start_str}
+    })
+    
+    # Inventory value change today (based on stock movements)
+    today_movements = await db.stock_movements.find({
+        "date": {"$gte": today_start_str}
+    }, {"_id": 0}).to_list(10000)
+    
+    inventory_change = 0
+    products = await db.products.find({"active": True}, {"_id": 0}).to_list(10000)
+    
+    for movement in today_movements:
+        product = next((p for p in products if p['id'] == movement['product_id']), None)
+        if product:
+            cost = product.get('cost', 0)
+            quantity_change = movement['quantity'] if movement['type'] == 'IN' else -movement['quantity']
+            inventory_change += quantity_change * cost
+    
+    return {
+        "alerts": {
+            "lowStock": low_stock_count,
+            "pendingOrders": pending_orders,
+            "incomingPurchases": incoming_purchases
+        },
+        "todayStats": {
+            "sales": round(today_sales, 2),
+            "orders": today_orders_count,
+            "newPurchases": new_purchases_today,
+            "inventoryChange": round(inventory_change, 2)
+        }
+    }
+
+
 @api_router.get("/dashboard/kpis")
 async def get_dashboard_kpis(current_user: User = Depends(get_current_user)):
     """Get key KPI data for the new dashboard layout"""
