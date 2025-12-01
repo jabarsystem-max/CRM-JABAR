@@ -291,6 +291,11 @@ const NewDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Critical Alerts - Separate section after charts */}
+      {controlPanelData?.alerts && (
+        <CriticalAlertsCard alerts={controlPanelData.alerts} />
+      )}
     </div>
   );
 };
