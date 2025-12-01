@@ -193,13 +193,13 @@ const ZenVitAI = () => {
                       // Check if line is a heading
                       if (line.startsWith('**') && line.endsWith('**')) {
                         const heading = line.replace(/\*\*/g, '');
-                        return <h4 key={idx} className="ai-explanation-heading">{heading}</h4>;
+                        return <h4 key={`heading-${idx}`} className="ai-explanation-heading">{heading}</h4>;
                       }
                       // Regular line
                       if (line.trim()) {
-                        return <p key={idx} className="ai-explanation-text">{line}</p>;
+                        return <p key={`line-${idx}`} className="ai-explanation-text">{line}</p>;
                       }
-                      return <br key={idx} />;
+                      return <br key={`br-${idx}`} />;
                     })}
                   </div>
                 </div>
