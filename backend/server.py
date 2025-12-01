@@ -58,6 +58,28 @@ app = FastAPI(
 api_router = APIRouter(prefix="/api")
 
 
+# Custom middleware to add CORS headers to static files
+class StaticFilesCORSMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        
+        # Add CORS headers for /uploads paths
+        if request.url.path.startswith("/uploads"):
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, HEAD, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "*"
+            
+            # Ensure correct Content-Type for images
+            if request.url.path.endswith(".png"):
+                response.headers["Content-Type"] = "image/png"
+            elif request.url.path.endswith((".jpg", ".jpeg")):
+                response.headers["Content-Type"] = "image/jpeg"
+            elif request.url.path.endswith(".webp"):
+                response.headers["Content-Type"] = "image/webp"
+        
+        return response
+
+
 # ============================================================================
 # MODELS - ALL CRM ENTITIES
 # ============================================================================
