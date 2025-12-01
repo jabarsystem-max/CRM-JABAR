@@ -56,27 +56,27 @@
 }
 
 .kpi-icon.green {
-  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+  background: linear-gradient(135deg, #D1FAE5 0%, #27AE60 100%);
 }
 
 .kpi-icon.red {
-  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  background: linear-gradient(135deg, #FEE2E2 0%, #EF4444 100%);
 }
 
 .kpi-icon.blue {
-  background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+  background: linear-gradient(135deg, #DBEAFE 0%, #3B82F6 100%);
 }
 
 .kpi-icon.purple {
-  background: linear-gradient(135deg, #E9D5FF 0%, #DDD6FE 100%);
+  background: linear-gradient(135deg, #E9D5FF 0%, #8B5CF6 100%);
 }
 
 .kpi-icon.yellow {
-  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  background: linear-gradient(135deg, #FEF3C7 0%, #F59E0B 100%);
 }
 
 .kpi-icon.orange {
-  background: linear-gradient(135deg, #FFEDD5 0%, #FED7AA 100%);
+  background: linear-gradient(135deg, #FFEDD5 0%, #F97316 100%);
 }
 
 .kpi-title {
