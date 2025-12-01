@@ -551,7 +551,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "New ZENVIT CRM dashboard and product creation testing completed successfully"
+    - "ZENVIT CRM Dashboard redesign with pastell colors and Purchase fix - COMPLETED SUCCESSFULLY"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
