@@ -1,0 +1,199 @@
+/* Reports Page Styling */
+.report-section {
+  margin-bottom: 32px;
+}
+
+.report-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.report-section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0;
+}
+
+.report-date {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6B7280;
+  background: #F9FAFB;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.report-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.report-metric-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s;
+}
+
+.report-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.metric-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.metric-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.metric-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1F2937;
+  line-height: 1;
+}
+
+/* Top Products */
+.top-products-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.top-product-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  transition: all 0.2s;
+}
+
+.top-product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.top-product-rank {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #27AE60 0%, #1E8449 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.top-product-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.top-product-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.top-product-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.top-product-sold {
+  color: #6B7280;
+}
+
+.top-product-revenue {
+  color: #27AE60;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 1280px) {
+  .report-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .top-products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .report-cards-grid,
+  .top-products-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .report-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* Dark Mode */
+.dark-mode .report-section-title {
+  color: #F9FAFB;
+}
+
+.dark-mode .report-date {
+  background: #374151;
+  color: #D1D5DB;
+}
+
+.dark-mode .report-metric-card,
+.dark-mode .top-product-card {
+  background: #1F2937;
+}
+
+.dark-mode .metric-label,
+.dark-mode .top-product-sold {
+  color: #9CA3AF;
+}
+
+.dark-mode .metric-value,
+.dark-mode .top-product-name {
+  color: #F9FAFB;
+}
