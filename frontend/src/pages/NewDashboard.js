@@ -14,12 +14,6 @@ const NewDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [timeFilter, setTimeFilter] = useState('month');
 
-  useEffect(() => {
-    if (token) {
-      fetchDashboardData();
-    }
-  }, [token]);
-
   const fetchDashboardData = async () => {
     try {
       const response = await axios.get(`${API_URL}/dashboard/kpis`, {
@@ -32,6 +26,13 @@ const NewDashboard = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (token) {
+      fetchDashboardData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const handleKPIClick = (destination, filter = null) => {
     if (filter) {
