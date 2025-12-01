@@ -63,6 +63,13 @@ const EditProduct = () => {
     }
   };
 
+  useEffect(() => {
+    if (token && id) {
+      fetchProductAndSuppliers();
+    }
+    // eslint-disable-next-line
+  }, [token, id]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
