@@ -124,7 +124,8 @@ const ZenVitAI = () => {
               <div className="ai-examples-grid">
                 {exampleQueries.map((query, idx) => (
                   <button
-                    key={idx}
+                    key={`example-${idx}`}
+                    type="button"
                     className="ai-example-btn"
                     onClick={() => handleExampleClick(query)}
                     disabled={loading}
