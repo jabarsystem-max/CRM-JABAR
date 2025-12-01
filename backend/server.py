@@ -2531,10 +2531,7 @@ Gi anbefalinger basert på beskrivelsen."""
 # ============================================================================
 app.include_router(api_router)
 
-# Mount static files for uploads
-app.mount("/uploads", StaticFiles(directory="/app/backend/uploads"), name="uploads")
-
-
+# Add CORS middleware BEFORE mounting static files so they get CORS headers
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -2542,6 +2539,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files for uploads (after CORS middleware)
+app.mount("/uploads", StaticFiles(directory="/app/backend/uploads"), name="uploads")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
