@@ -264,18 +264,15 @@ const Products = () => {
             >
               {/* Product Image */}
               <div className="product-image-container">
-                {product.image_url || product.thumbnail_url ? (
-                  <img 
-                    src={`${process.env.REACT_APP_BACKEND_URL}${product.image_url || product.thumbnail_url}`} 
-                    alt={product.name}
-                    className="product-image"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="product-image-placeholder">
-                    <span className="placeholder-icon">📦</span>
-                  </div>
-                )}
+                <img 
+                  src={`${process.env.REACT_APP_BACKEND_URL}${product.image_url || '/uploads/products/placeholder.png'}`} 
+                  alt={product.name}
+                  className="product-image"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.target.src = `${process.env.REACT_APP_BACKEND_URL}/uploads/products/placeholder.png`;
+                  }}
+                />
               </div>
               
               {/* Product Info */}
