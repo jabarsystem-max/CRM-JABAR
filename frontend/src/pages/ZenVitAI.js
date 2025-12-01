@@ -125,7 +125,7 @@ const ZenVitAI = () => {
                   <button
                     key={idx}
                     className="ai-example-btn"
-                    onClick={() => useExample(query)}
+                    onClick={() => handleExampleClick(query)}
                     disabled={loading}
                   >
                     {query}
