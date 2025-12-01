@@ -13,12 +13,6 @@ const LowStockProducts = () => {
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (token) {
-      fetchLowStockProducts();
-    }
-  }, [token]);
-
   const fetchLowStockProducts = async () => {
     try {
       // Get all stock items with Low or Out status
