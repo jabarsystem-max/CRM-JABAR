@@ -66,12 +66,35 @@ const Products = () => {
     setError('');
     
     try {
+      // Prepare data with proper type conversions
+      const submitData = {
+        ...formData,
+        // Convert empty strings to null for optional number fields
+        weight_grams: formData.weight_grams === '' ? null : parseFloat(formData.weight_grams),
+        units_per_package: formData.units_per_package === '' ? 1 : parseInt(formData.units_per_package),
+        // Required fields - keep as numbers
+        cost: parseFloat(formData.cost),
+        price: parseFloat(formData.price),
+        min_stock: parseInt(formData.min_stock),
+        // Convert empty string to null for optional fields
+        ean: formData.ean === '' ? null : formData.ean,
+        supplier_id: formData.supplier_id === '' ? null : formData.supplier_id,
+        subcategory: formData.subcategory === '' ? null : formData.subcategory,
+        brand: formData.brand === '' ? null : formData.brand,
+        short_description: formData.short_description === '' ? null : formData.short_description,
+        description: formData.description === '' ? null : formData.description,
+        full_description: formData.full_description === '' ? null : formData.full_description,
+        packaging_type: formData.packaging_type === '' ? null : formData.packaging_type,
+        color: formData.color === '' ? null : formData.color,
+        image_url: formData.image_url === '' ? null : formData.image_url
+      };
+
       if (editingProduct) {
-        await axios.put(`${API_URL}/products/${editingProduct.id}`, formData, {
+        await axios.put(`${API_URL}/products/${editingProduct.id}`, submitData, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post(`${API_URL}/products`, formData, {
+        await axios.post(`${API_URL}/products`, submitData, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -81,7 +104,20 @@ const Products = () => {
       fetchProducts();
     } catch (error) {
       console.error('Error saving product:', error);
-      setError(error.response?.data?.detail || 'Feil ved lagring av produkt');
+      
+      // Handle Pydantic validation errors (array of error objects)
+      if (error.response?.data?.detail && Array.isArray(error.response.data.detail)) {
+        const errors = error.response.data.detail;
+        const errorMessages = errors.map(err => {
+          const field = err.loc[err.loc.length - 1];
+          return `${field}: ${err.msg}`;
+        }).join(', ');
+        setError(errorMessages);
+      } else if (typeof error.response?.data?.detail === 'string') {
+        setError(error.response.data.detail);
+      } else {
+        setError('Feil ved lagring av produkt');
+      }
     }
   };
 
@@ -410,7 +446,7 @@ const Products = () => {
                       onChange={handleChange}
                       className="form-input"
                       pattern="[0-9]*"
-                      placeholder="13 siffer"
+                      placeholder="13 siffer (valgfritt)"
                     />
                   </div>
 
@@ -453,6 +489,7 @@ const Products = () => {
                       onChange={handleChange}
                       className="form-input"
                       step="0.1"
+                      placeholder="Valgfritt"
                     />
                   </div>
 
@@ -507,7 +544,7 @@ const Products = () => {
                       onChange={handleChange}
                       className="form-select"
                     >
-                      <option value="">Velg leverandør</option>
+                      <option value="">Velg leverandør (valgfritt)</option>
                       {suppliers.map(supplier => (
                         <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
                       ))}
