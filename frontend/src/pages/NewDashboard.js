@@ -68,6 +68,9 @@ const NewDashboard = () => {
         <p className="dashboard-subtitle">Oversikt over din virksomhet</p>
       </div>
 
+      {/* Control Panel */}
+      {controlPanelData && <DashboardControlPanel data={controlPanelData} />}
+
       {/* KPI Cards - 2 rows x 3 columns */}
       <div className="kpi-grid">
         {/* Row 1 */}
