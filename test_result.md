@@ -575,7 +575,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Edit Product functionality - White Screen Bug Fix - COMPLETED SUCCESSFULLY"
+    - "ZenVit AI-Veileder MVP - COMPREHENSIVE TESTING COMPLETED SUCCESSFULLY"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
