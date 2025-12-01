@@ -17,12 +17,6 @@ const EditProduct = () => {
   const [error, setError] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  useEffect(() => {
-    if (token && id) {
-      fetchProductAndSuppliers();
-    }
-  }, [token, id]);
-
   const fetchProductAndSuppliers = async () => {
     try {
       const [productRes, suppliersRes] = await Promise.all([
