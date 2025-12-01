@@ -2407,6 +2407,7 @@ async def ai_recommend_products(
     """AI-powered product recommendations based on customer needs"""
     try:
         import openai
+        import re
         
         customer_context = request_data.get("customer_context", "")
         
@@ -2454,7 +2455,7 @@ SVAR FORMAT (JSON):
       "dose": "Anbefalt dose og tidspunkt"
     }
   ],
-  "explanation": "Detaljert forklaring i markdown format med:\n- Identifiserte behov\n- Hver produktanbefalning med begrunnelse\n- Hvordan bruke sammen\n- Viktig disclaimer om at dette er generelle anbefalinger"
+  "explanation": "Detaljert forklaring i markdown format med:\\n- Identifiserte behov\\n- Hver produktanbefalning med begrunnelse\\n- Hvordan bruke sammen\\n- Viktig disclaimer om at dette er generelle anbefalinger"
 }
 
 Svar ALLTID med gyldig JSON."""
@@ -2488,136 +2489,6 @@ Gi anbefalinger basert på beskrivelsen."""
         # Parse JSON response
         try:
             # Try to extract JSON from response
-            import re
-            json_match = re.search(r'\{.*\}', ai_response, re.DOTALL)
-            if json_match:
-                ai_data = json.loads(json_match.group())
-            else:
-                ai_data = json.loads(ai_response)
-                
-            return {
-                "success": True,
-                "recommendations": ai_data
-            }
-        except json.JSONDecodeError:
-            # If JSON parsing fails, return raw response
-            return {
-                "success": True,
-                "recommendations": {
-                    "products": [],
-                    "explanation": ai_response
-                }
-            }
-        
-        # FALLBACK MOCK RESPONSE (in case API fails)
-        mock_products = []
-        mock_explanation = ""
-        
-        if "fisk" in customer_context.lower() and "vinter" in customer_context.lower():
-            # Winter + no fish scenario
-            mock_products = [
-                {
-                    "name": "D3 + K2 Premium",
-                    "reason": "Viktig for immunforsvar og benhelse, spesielt om vinteren når sollys er begrenset",
-                    "dose": "1 kapsel daglig til måltid"
-                },
-                {
-                    "name": "Omega-3 Triglyceride",
-                    "reason": "Erstatter omega-3 fra fisk, støtter sirkulasjon og hjerte-kar-helse",
-                    "dose": "2 kapsler daglig til måltid"
-                },
-                {
-                    "name": "C-vitamin + Sink",
-                    "reason": "Styrker immunforsvaret og bidrar til raskere tilheling",
-                    "dose": "1 kapsel daglig, helst på tom mage"
-                }
-            ]
-            mock_explanation = """**Identifiserte behov:**
-- Mangel på D-vitamin grunnet lite sollys om vinteren
-- Omega-3 mangel siden kunden ikke spiser fisk
-- Svekket immunforsvar som kan føre til hyppig sykdom
-
-**Produktanbefalinger:**
-
-**D3 + K2 Premium** - Kombinasjonen av D3 og K2 sikrer optimal opptak og utnyttelse. D-vitamin er kritisk for immunforsvar og benhelse, spesielt om vinteren.
-
-**Omega-3 Triglyceride** - Høykvalitets omega-3 i triglyceridform som erstatning for fisk. Støtter hjerte-kar-helse og reduserer betennelser.
-
-**C-vitamin + Sink** - Kraftig immunstøtte som hjelper kroppen å bekjempe infeksjoner og tilhele raskere.
-
-**Bruksanvisning:**
-Ta D3+K2 og Omega-3 til måltid for best opptak. C-vitamin kan tas på tom mage for raskere virkning.
-
-**Varighet:** Start med 8-12 ukers kur, deretter vurder vedlikeholdsdose.
-
-⚠️ **Viktig:** Dette er generelle anbefalinger basert på produktinformasjon. Ved vedvarende helseplager bør kunden konsultere lege."""
-            
-        elif "energi" in customer_context.lower() and "søvn" in customer_context.lower():
-            # Energy + sleep issues
-            mock_products = [
-                {
-                    "name": "Magnesium Glysinat 400mg",
-                    "reason": "Støtter muskelavslapping og bedre søvnkvalitet, reduserer stress",
-                    "dose": "1-2 kapsler 1 time før sengetid"
-                },
-                {
-                    "name": "D3 + K2 Premium", 
-                    "reason": "D-vitaminmangel kan påvirke energinivå og søvnrytme",
-                    "dose": "1 kapsel daglig til frokost"
-                }
-            ]
-            mock_explanation = """**Identifiserte behov:**
-- Dårlig søvnkvalitet som påvirker energinivå
-- Mulig stress og muskelspanning
-- Potensielt D-vitaminmangel
-
-**Produktanbefalinger:**
-
-**Magnesium Glysinat 400mg** - Magnesium i høyt biotilgjengelig form som støtter muskelavslapping og nervesystemet. Hjelper med å forbedre søvnkvalitet.
-
-**D3 + K2 Premium** - D-vitamin påvirker både energi og søvnrytme. Mangel kan gi tretthet og forstyrret døgnrytme.
-
-**Bruksanvisning:**
-Ta magnesium på kvelden for bedre søvn. D3+K2 tas om morgenen for å støtte naturlig døgnrytme.
-
-⚠️ **Viktig:** Dette er generelle anbefalinger. Ved vedvarende søvnproblemer bør kunden konsultere lege."""
-            
-        else:
-            # Generic stress/concentration scenario
-            mock_products = [
-                {
-                    "name": "Magnesium Glysinat 400mg",
-                    "reason": "Støtter nervesystemet og reduserer stress, forbedrer konsentrasjon",
-                    "dose": "1 kapsel morgen og kveld"
-                },
-                {
-                    "name": "Omega-3 Triglyceride",
-                    "reason": "Omega-3 støtter hjernefunksjon og kognitiv ytelse",
-                    "dose": "2 kapsler daglig til måltid"
-                }
-            ]
-            mock_explanation = """**Identifiserte behov:**
-- Stress og konsentrasjonsvansker
-- Støtte til nervesystem og hjernefunksjon
-
-**Produktanbefalinger:**
-
-**Magnesium Glysinat** - Støtter nervesystemet og hjelper kroppen å håndtere stress bedre.
-
-**Omega-3 Triglyceride** - Viktig for hjernefunksjon og kognitiv ytelse.
-
-⚠️ **Viktig:** Dette er generelle anbefalinger basert på produktinformasjon."""
-        
-        # Create mock AI response in expected format
-        ai_response = json.dumps({
-            "products": mock_products,
-            "explanation": mock_explanation
-        }, ensure_ascii=False)
-        
-        # Parse JSON response
-        try:
-            # Try to extract JSON from response
-            import re
             json_match = re.search(r'\{.*\}', ai_response, re.DOTALL)
             if json_match:
                 ai_data = json.loads(json_match.group())
