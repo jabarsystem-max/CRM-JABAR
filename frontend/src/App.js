@@ -8,6 +8,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/NewDashboard';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
+import EditProduct from './pages/EditProduct';
+import LowStockProducts from './pages/LowStockProducts';
 import Stock from './pages/Stock';
 import StockMovements from './pages/StockMovements';
 import Orders from './pages/Orders';
