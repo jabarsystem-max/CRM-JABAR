@@ -2398,6 +2398,122 @@ async def seed_data():
 # ============================================================================
 # REGISTER ROUTES - MUST BE AFTER ALL ROUTE DEFINITIONS
 # ============================================================================
+@api_router.post("/ai/recommend-products")
+async def ai_recommend_products(
+    request_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """AI-powered product recommendations based on customer needs"""
+    try:
+        import openai
+        
+        customer_context = request_data.get("customer_context", "")
+        
+        if not customer_context or len(customer_context.strip()) < 10:
+            raise HTTPException(status_code=400, detail="Vennligst gi en mer detaljert beskrivelse av kunden")
+        
+        # Get all active products from database
+        products = await db.products.find({"active": True}, {"_id": 0}).to_list(1000)
+        
+        # Prepare products data for AI
+        products_info = []
+        for p in products:
+            product_data = {
+                "name": p.get("name"),
+                "category": p.get("category"),
+                "subcategory": p.get("subcategory"),
+                "tags": p.get("health_areas", []),
+                "description": p.get("short_description") or p.get("description", ""),
+                "sku": p.get("sku"),
+                "price": p.get("price")
+            }
+            products_info.append(product_data)
+        
+        # Create AI prompt
+        system_prompt = """Du er "ZenVit AI-Veileder", en intern fagassistent for ZenVit CRM.
+
+VIKTIGE REGLER:
+- Du hjelper kun ansatte, ikke sluttkunden direkte
+- Du foreslår ALLTID kun ZenVit-produkter basert på produktdata som gis
+- Du gir trygge, enkle, ærlige anbefalinger uten å overdrive
+- Du gir IKKE medisinske diagnoser
+- Du bruker en rolig, profesjonell og tydelig stil
+- Du anbefaler maksimum 3 produkter
+
+OPPGAVE:
+Basert på kundebeskrivelsen, identifiser behov og match mot produkttags/kategori.
+Velg 1-3 hovedprodukter som passer best.
+
+SVAR FORMAT (JSON):
+{
+  "products": [
+    {
+      "name": "Produktnavn",
+      "reason": "Kort grunn (1-2 setninger)",
+      "dose": "Anbefalt dose og tidspunkt"
+    }
+  ],
+  "explanation": "Detaljert forklaring i markdown format med:\n- Identifiserte behov\n- Hver produktanbefalning med begrunnelse\n- Hvordan bruke sammen\n- Viktig disclaimer om at dette er generelle anbefalinger"
+}
+
+Svar ALLTID med gyldig JSON."""
+
+        user_prompt = f"""KUNDEBESKRIVELSE:
+{customer_context}
+
+TILGJENGELIGE ZENVIT-PRODUKTER:
+{json.dumps(products_info, indent=2, ensure_ascii=False)}
+
+Gi anbefalinger basert på beskrivelsen."""
+
+        # Call OpenAI API with Emergent key
+        openai.api_key = "sk-emergent-bDeF7E1Fc202d02EdC2A8AB33Bdd17Fe5eFADD66B5f7B5BD"
+        openai.base_url = "https://api.emergent.sh/v1"
+        
+        response = openai.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1500
+        )
+        
+        ai_response = response.choices[0].message.content
+        
+        # Parse JSON response
+        try:
+            # Try to extract JSON from response
+            import re
+            json_match = re.search(r'\{.*\}', ai_response, re.DOTALL)
+            if json_match:
+                ai_data = json.loads(json_match.group())
+            else:
+                ai_data = json.loads(ai_response)
+                
+            return {
+                "success": True,
+                "recommendations": ai_data
+            }
+        except json.JSONDecodeError:
+            # If JSON parsing fails, return raw response
+            return {
+                "success": True,
+                "recommendations": {
+                    "products": [],
+                    "explanation": ai_response
+                }
+            }
+            
+    except Exception as e:
+        logging.error(f"AI recommendation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Kunne ikke generere anbefalinger: {str(e)}")
+
+
+# ============================================================================
+# REGISTER ROUTES - MUST BE AFTER ALL ROUTE DEFINITIONS
+# ============================================================================
 app.include_router(api_router)
 
 # Mount static files for uploads
