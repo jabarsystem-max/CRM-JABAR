@@ -72,13 +72,24 @@ const NewPurchase = () => {
     e.preventDefault();
     setError('');
 
+    if (!formData.supplier_id || !formData.product_id) {
+      setError('Vennligst velg både leverandør og produkt');
+      return;
+    }
+
     try {
+      // Find product details
+      const product = products.find(p => p.id === formData.product_id);
+      
       const purchaseData = {
-        ...formData,
-        quantity: parseInt(formData.quantity),
-        unit_cost: parseFloat(formData.unit_cost),
-        total_cost: calculateTotal(),
-        date: new Date().toISOString()
+        supplier_id: formData.supplier_id,
+        items: [{
+          product_id: formData.product_id,
+          product_name: product ? product.name : 'Ukjent produkt',
+          quantity: parseInt(formData.quantity),
+          cost_price: parseFloat(formData.unit_cost)
+        }],
+        notes: formData.notes || null
       };
 
       await axios.post(`${API_URL}/purchases`, purchaseData, {
@@ -88,7 +99,20 @@ const NewPurchase = () => {
       navigate('/purchases');
     } catch (error) {
       console.error('Error creating purchase:', error);
-      setError(error.response?.data?.detail || 'Feil ved opprettelse av innkjøp');
+      
+      // Handle validation errors
+      if (error.response?.data?.detail && Array.isArray(error.response.data.detail)) {
+        const errors = error.response.data.detail;
+        const errorMessages = errors.map(err => {
+          const field = err.loc[err.loc.length - 1];
+          return `${field}: ${err.msg}`;
+        }).join(', ');
+        setError(errorMessages);
+      } else if (typeof error.response?.data?.detail === 'string') {
+        setError(error.response.data.detail);
+      } else {
+        setError('Feil ved opprettelse av innkjøp');
+      }
     }
   };
 
