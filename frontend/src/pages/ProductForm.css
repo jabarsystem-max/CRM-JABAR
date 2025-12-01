@@ -390,6 +390,18 @@
   font-size: 24px;
 }
 
+/* Form Container */
+.form-container {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.form-section {
+  margin-bottom: 32px;
+}
+
 @media (max-width: 1024px) {
   .order-item-row {
     grid-template-columns: 1fr;
@@ -398,6 +410,10 @@
   
   .order-item-number {
     justify-self: start;
+  }
+  
+  .form-container {
+    padding: 20px;
   }
 }
 
