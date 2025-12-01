@@ -31,8 +31,7 @@ const NewDashboard = () => {
     if (token) {
       fetchDashboardData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, fetchDashboardData]);
 
   const handleKPIClick = (destination, filter = null) => {
     if (filter) {
