@@ -1,16 +1,15 @@
-/* Dashboard Control Panel */
+/* Dashboard Control Panel - Pastell ZENVIT Style */
 .control-panel {
-  background: #FFFFFF;
-  border-radius: 20px;
-  padding: 24px;
+  background: transparent;
+  border-radius: 16px;
+  padding: 0;
   margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .control-panel-container {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 32px;
+  gap: 20px;
   align-items: center;
 }
 
@@ -21,65 +20,77 @@
   gap: 16px;
 }
 
-/* DateTime Section */
+/* DateTime Section - Pastell Grønn Kalender */
 .cp-datetime {
-  gap: 12px;
+  background: linear-gradient(135deg, #E7F6EF 0%, #D1F2E0 100%);
+  padding: 20px 24px;
+  border-radius: 18px;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.08);
+  border: 1px solid rgba(39, 174, 96, 0.1);
 }
 
 .cp-icon {
-  font-size: 32px;
+  font-size: 36px;
+  opacity: 0.6;
+  color: #27AE60;
 }
 
 .cp-datetime-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .cp-datetime-main {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1F2937;
+  font-size: 18px;
+  font-weight: 700;
+  color: #263238;
+  letter-spacing: -0.3px;
 }
 
 .cp-datetime-sub {
   font-size: 12px;
-  color: #9CA3AF;
+  color: #6B7280;
+  font-weight: 500;
 }
 
-/* Quick Actions */
+/* Quick Actions - Pastell Stil */
 .cp-actions {
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .cp-action-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #27AE60 0%, #1E8449 100%);
+  gap: 10px;
+  padding: 12px 24px;
+  background: #E7F6EF;
   border: none;
-  border-radius: 24px;
-  color: white;
+  border-radius: 20px;
+  color: #263238;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.2);
+  box-shadow: 0 2px 6px rgba(39, 174, 96, 0.08);
 }
 
 .cp-action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.15);
+  background: #D1F2E0;
 }
 
 .cp-action-icon {
-  font-size: 16px;
+  font-size: 18px;
+  opacity: 0.7;
 }
 
 .cp-action-label {
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 /* Info Section (Alerts & Stats) */
@@ -89,11 +100,11 @@
   gap: 12px;
 }
 
-/* Alerts */
+/* Alerts - Pastell */
 .cp-alerts {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   align-items: flex-end;
 }
 
@@ -101,38 +112,42 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
-  border-radius: 12px;
+  padding: 8px 14px;
+  border-radius: 14px;
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
+  font-weight: 500;
 }
 
 .cp-alert-warning {
-  background: #FEF3C7;
+  background: #FFF8E0;
   color: #92400E;
 }
 
 .cp-alert-warning:hover {
-  background: #FDE68A;
+  background: #FEF3C7;
+  transform: translateX(-4px);
 }
 
 .cp-alert-info {
-  background: #DBEAFE;
+  background: #ECF4FE;
   color: #1E40AF;
 }
 
 .cp-alert-info:hover {
-  background: #BFDBFE;
+  background: #DBEAFE;
+  transform: translateX(-4px);
 }
 
 .cp-alert-success {
-  background: #D1FAE5;
+  background: #EAF7F1;
   color: #065F46;
 }
 
 .cp-alert-success:hover {
-  background: #A7F3D0;
+  background: #D1FAE5;
+  transform: translateX(-4px);
 }
 
 .cp-alert-icon {
@@ -140,48 +155,49 @@
 }
 
 .cp-alert-text {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* Today Stats */
 .cp-stats {
   display: flex;
-  gap: 20px;
+  gap: 24px;
 }
 
 .cp-stat {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
+  gap: 4px;
 }
 
 .cp-stat-value {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  color: #1F2937;
+  color: #263238;
 }
 
 .cp-stat-value.positive {
-  color: #059669;
+  color: #27AE60;
 }
 
 .cp-stat-value.negative {
-  color: #DC2626;
+  color: #EF4444;
 }
 
 .cp-stat-label {
   font-size: 11px;
-  color: #9CA3AF;
+  color: #6B7280;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: 600;
 }
 
 /* Responsive */
 @media (max-width: 1280px) {
   .control-panel-container {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 16px;
   }
   
   .cp-section {
@@ -219,8 +235,8 @@
 }
 
 /* Dark Mode */
-.dark-mode .control-panel {
-  background: #1F2937;
+.dark-mode .cp-datetime {
+  background: linear-gradient(135deg, #1E4030 0%, #2D5A40 100%);
 }
 
 .dark-mode .cp-datetime-main {
@@ -228,7 +244,16 @@
 }
 
 .dark-mode .cp-datetime-sub {
-  color: #6B7280;
+  color: #9CA3AF;
+}
+
+.dark-mode .cp-action-btn {
+  background: #1E4030;
+  color: #D1FAE5;
+}
+
+.dark-mode .cp-action-btn:hover {
+  background: #2D5A40;
 }
 
 .dark-mode .cp-stat-value {
