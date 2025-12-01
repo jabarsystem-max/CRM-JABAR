@@ -2469,7 +2469,7 @@ Gi anbefalinger basert på beskrivelsen."""
 
         # Call OpenAI API with Emergent key
         openai.api_key = "sk-emergent-bDeF7E1Fc202d02EdC2A8AB33Bdd17Fe5eFADD66B5f7B5BD"
-        openai.base_url = "https://api.emergent.sh/v1/"
+        openai.base_url = "https://api.emergent.sh"
         
         response = openai.chat.completions.create(
             model="gpt-4o-mini",
