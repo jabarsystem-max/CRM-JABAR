@@ -78,7 +78,11 @@ const ProductDetail = () => {
           {/* Product Header */}
           <div className="product-detail-header">
             {product.image_url ? (
-              <img src={product.image_url} alt={product.name} className="product-detail-image" />
+              <img 
+                src={`${process.env.REACT_APP_BACKEND_URL}${product.image_url}`} 
+                alt={product.name} 
+                className="product-detail-image" 
+              />
             ) : (
               <div className="product-detail-image-placeholder">📦</div>
             )}
