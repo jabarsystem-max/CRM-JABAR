@@ -18,10 +18,17 @@ const NewDashboard = () => {
 
   const fetchDashboardData = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_URL}/dashboard/kpis`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setDashboardData(response.data);
+      const [kpisResponse, controlResponse] = await Promise.all([
+        axios.get(`${API_URL}/dashboard/kpis`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${API_URL}/dashboard/control-panel`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
+      
+      setDashboardData(kpisResponse.data);
+      setControlPanelData(controlResponse.data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
