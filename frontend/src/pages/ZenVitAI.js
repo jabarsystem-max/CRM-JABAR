@@ -55,7 +55,7 @@ const ZenVitAI = () => {
     "Eldre kunde med leddsmerter og stivhet"
   ];
 
-  const useExample = (query) => {
+  const handleExampleClick = (query) => {
     setCustomerContext(query);
     setRecommendations(null);
     setError('');
