@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import DashboardControlPanel from '../components/DashboardControlPanel';
 import './NewDashboard.css';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
@@ -12,6 +13,7 @@ const NewDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
+  const [controlPanelData, setControlPanelData] = useState(null);
   const [timeFilter, setTimeFilter] = useState('month');
 
   const fetchDashboardData = useCallback(async () => {
