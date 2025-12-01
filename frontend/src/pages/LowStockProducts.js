@@ -47,6 +47,13 @@ const LowStockProducts = () => {
     }
   };
 
+  useEffect(() => {
+    if (token) {
+      fetchLowStockProducts();
+    }
+    // eslint-disable-next-line
+  }, [token]);
+
   if (loading) return <div className="loading">Laster produkter med lavt lager...</div>;
 
   return (
