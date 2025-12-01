@@ -185,6 +185,72 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+/* Low Stock Cards */
+.low-stock-card {
+  border: 2px solid #FEF3C7;
+  background: #FFFBEB;
+}
+
+.low-stock-card .product-card-header {
+  position: relative;
+}
+
+.warning-overlay {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.warning-icon {
+  font-size: 24px;
+}
+
+.meta-warning .meta-value {
+  color: #DC2626;
+  font-weight: 700;
+}
+
+.badge-danger {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.badge-warning {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.empty-icon {
+  font-size: 80px;
+  margin-bottom: 24px;
+}
+
+.empty-state h3 {
+  font-size: 24px;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.empty-state p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .form-grid {
