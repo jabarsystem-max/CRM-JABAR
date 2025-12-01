@@ -67,7 +67,7 @@ const ProductDetail = () => {
         <button className="btn-secondary" onClick={() => navigate('/products')}>
           ← Tilbake
         </button>
-        <button className="btn-primary" onClick={() => navigate(`/products/edit/${id}`)}>
+        <button className="btn-primary" onClick={() => navigate(`/products/${id}/edit`)}>
           ✏️ Rediger produkt
         </button>
       </div>
