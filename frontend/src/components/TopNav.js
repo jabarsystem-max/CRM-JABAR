@@ -28,6 +28,7 @@ const TopNav = () => {
     { path: '/stock', label: 'Lager', icon: '📊' },
     { path: '/purchases', label: 'Innkjøp', icon: '🛒' },
     { path: '/customers', label: 'Kunder', icon: '👥' },
+    { path: '/ai', label: 'ZenVit AI', icon: '🧠' },
     { path: '/reports', label: 'Rapporter', icon: '📈' },
   ];
 
