@@ -2467,10 +2467,49 @@ TILGJENGELIGE ZENVIT-PRODUKTER:
 
 Gi anbefalinger basert på beskrivelsen."""
 
-        # MOCK AI RESPONSE FOR TESTING - Replace with actual Emergent API call
-        # This demonstrates the UI functionality while the API integration is being fixed
+        # Call OpenAI API with Emergent key
+        client = openai.OpenAI(
+            api_key="sk-emergent-bDeF7E1Fc202d02EdC2A8AB33Bdd17Fe5eFADD66B5f7B5BD",
+            base_url="https://api.emergent.sh/v1"
+        )
         
-        # Determine which products to recommend based on customer context
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1500
+        )
+        
+        ai_response = response.choices[0].message.content
+        
+        # Parse JSON response
+        try:
+            # Try to extract JSON from response
+            import re
+            json_match = re.search(r'\{.*\}', ai_response, re.DOTALL)
+            if json_match:
+                ai_data = json.loads(json_match.group())
+            else:
+                ai_data = json.loads(ai_response)
+                
+            return {
+                "success": True,
+                "recommendations": ai_data
+            }
+        except json.JSONDecodeError:
+            # If JSON parsing fails, return raw response
+            return {
+                "success": True,
+                "recommendations": {
+                    "products": [],
+                    "explanation": ai_response
+                }
+            }
+        
+        # FALLBACK MOCK RESPONSE (in case API fails)
         mock_products = []
         mock_explanation = ""
         
