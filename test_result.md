@@ -590,7 +590,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Upgraded Product Cards with Apple Clean Style - TESTING COMPLETED SUCCESSFULLY"
+    - "Product Image Functionality Testing - TESTING COMPLETED SUCCESSFULLY"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
