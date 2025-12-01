@@ -42,6 +42,13 @@ const NewOrder = () => {
     }
   };
 
+  useEffect(() => {
+    if (token) {
+      fetchData();
+    }
+    // eslint-disable-next-line
+  }, [token]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
