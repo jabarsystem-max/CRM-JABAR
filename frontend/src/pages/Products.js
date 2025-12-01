@@ -198,8 +198,8 @@ const Products = () => {
         }
       });
 
-      // Update form data with the uploaded image URL
-      const imageUrl = `${process.env.REACT_APP_BACKEND_URL}${response.data.image_url}`;
+      // Update form data with the uploaded image URL (backend returns relative path)
+      const imageUrl = response.data.image_url;
       setFormData(prev => ({ ...prev, image_url: imageUrl }));
       setSelectedFile(file);
     } catch (error) {
