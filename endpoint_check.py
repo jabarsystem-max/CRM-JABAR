@@ -5,7 +5,7 @@ Check which endpoints exist and work
 
 import requests
 
-BACKEND_URL = "https://inventory-zen-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://sleek-product-view.preview.emergentagent.com/api"
 TEST_CREDENTIALS = {"email": "admin@zenvit.no", "password": "admin123"}
 
 def check_endpoints():
