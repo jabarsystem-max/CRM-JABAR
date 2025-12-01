@@ -1868,6 +1868,115 @@ async def get_dashboard(current_user: User = Depends(get_current_user)):
     }
 
 
+@api_router.get("/dashboard/kpis")
+async def get_dashboard_kpis(current_user: User = Depends(get_current_user)):
+    """Get key KPI data for the new dashboard layout"""
+    
+    # 1. Total Active Products
+    products = await db.products.find({"active": True}, {"_id": 0}).to_list(10000)
+    total_products = len(products)
+    
+    # 2. Low Stock Count
+    low_stock_items = await db.stock.find({"status": {"$in": ["Low", "Out"]}}, {"_id": 0}).to_list(1000)
+    low_stock_count = len(low_stock_items)
+    
+    # 3. Sales This Month
+    now = datetime.now(timezone.utc)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    month_start_str = month_start.isoformat()
+    
+    month_orders = await db.orders.find({
+        "date": {"$gte": month_start_str},
+        "status": {"$in": ["Processing", "Packed", "Shipped", "Delivered"]}
+    }, {"_id": 0}).to_list(10000)
+    
+    sales_count = len(month_orders)
+    sales_revenue = sum(order.get('order_total', 0) for order in month_orders)
+    
+    # 4. Incoming Purchases
+    incoming_purchases = await db.purchases.find({
+        "status": {"$in": ["Ordered", "In_Transit"]}
+    }, {"_id": 0}).to_list(1000)
+    incoming_count = len(incoming_purchases)
+    
+    # 5. Total Inventory Value
+    all_stock = await db.stock.find({}, {"_id": 0, "product_id": 1, "quantity": 1}).to_list(10000)
+    total_value = 0
+    
+    for stock_item in all_stock:
+        product = next((p for p in products if p['id'] == stock_item['product_id']), None)
+        if product:
+            total_value += stock_item['quantity'] * product.get('cost', 0)
+    
+    # 6. Active Customers This Month
+    # Find unique customer IDs from this month's orders
+    active_customer_ids = set(order.get('customer_id') for order in month_orders if order.get('customer_id'))
+    active_customers_count = len(active_customer_ids)
+    
+    # Last 30 days data for graph
+    days_data = []
+    for i in range(30):
+        day = now - timedelta(days=29-i)
+        day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = day_start + timedelta(days=1)
+        
+        day_orders = [o for o in month_orders 
+                      if day_start.isoformat() <= o['date'] < day_end.isoformat()]
+        
+        days_data.append({
+            "date": day.strftime("%Y-%m-%d"),
+            "orders": len(day_orders),
+            "revenue": round(sum(o.get('order_total', 0) for o in day_orders), 2)
+        })
+    
+    # Low stock top 5 with product details
+    low_stock_details = []
+    for stock in low_stock_items[:5]:
+        product = next((p for p in products if p['id'] == stock['product_id']), None)
+        if product:
+            low_stock_details.append({
+                "product_name": product['name'],
+                "current_stock": stock['quantity'],
+                "min_stock": stock['min_stock'],
+                "status": stock['status']
+            })
+    
+    # Recent orders (last 5)
+    recent_orders = sorted(month_orders, key=lambda x: x.get('date', ''), reverse=True)[:5]
+    recent_orders_details = []
+    
+    for order in recent_orders:
+        customer = await db.customers.find_one({"id": order.get('customer_id')}, {"_id": 0, "name": 1})
+        recent_orders_details.append({
+            "id": order['id'],
+            "date": order['date'][:10],  # Just the date part
+            "customer": customer.get('name') if customer else "Unknown",
+            "total": round(order.get('order_total', 0), 2),
+            "status": order.get('status', 'Unknown')
+        })
+    
+    return {
+        "kpis": {
+            "total_products": total_products,
+            "low_stock": low_stock_count,
+            "sales_this_month": {
+                "count": sales_count,
+                "revenue": round(sales_revenue, 2)
+            },
+            "incoming_purchases": incoming_count,
+            "inventory_value": round(total_value, 2),
+            "active_customers": active_customers_count
+        },
+        "chart_data": {
+            "last_30_days": days_data
+        },
+        "tables": {
+            "low_stock": low_stock_details,
+            "recent_orders": recent_orders_details
+        }
+    }
+
+
 # ============================================================================
 # REPORTS ROUTES
 # ============================================================================
