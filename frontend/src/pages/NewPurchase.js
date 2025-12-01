@@ -23,12 +23,6 @@ const NewPurchase = () => {
     notes: ''
   });
 
-  useEffect(() => {
-    if (token) {
-      fetchData();
-    }
-  }, [token]);
-
   const fetchData = async () => {
     try {
       const [suppliersRes, productsRes] = await Promise.all([
