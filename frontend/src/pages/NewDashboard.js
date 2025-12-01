@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +14,7 @@ const NewDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [timeFilter, setTimeFilter] = useState('month');
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/dashboard/kpis`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -25,7 +25,7 @@ const NewDashboard = () => {
       console.error('Error fetching dashboard data:', error);
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     if (token) {
