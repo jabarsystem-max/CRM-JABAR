@@ -59,6 +59,7 @@ function App() {
             <Route path="tasks" element={<Tasks />} />
             <Route path="expenses" element={<Expenses />} />
             <Route path="reports" element={<Reports />} />
+            <Route path="ai" element={<ZenVitAI />} />
             <Route path="search" element={<Search />} />
             <Route path="settings" element={<Settings />} />
           </Route>
