@@ -29,25 +29,6 @@ const Stock = () => {
     fetchStock();
   }, [token]);
 
-  const handleUpdate = async (productId) => {
-    try {
-      await axios.put(
-        `${API_URL}/stock/${productId}`,
-        { 
-          quantity: parseInt(formData.quantity),
-          min_stock: parseInt(formData.min_stock)
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setEditItem(null);
-      setFormData({ quantity: '', min_stock: '' });
-      fetchStock();
-    } catch (error) {
-      console.error('Error updating stock:', error);
-      alert('Kunne ikke oppdatere lager');
-    }
-  };
-
   if (loading) return <div className="loading">Laster...</div>;
 
   const totalValue = stock.reduce((sum, item) => sum + (item.quantity * (item.product_cost || 0)), 0);
