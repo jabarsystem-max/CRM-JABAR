@@ -11,8 +11,6 @@ const Stock = () => {
   const navigate = useNavigate();
   const [stock, setStock] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editItem, setEditItem] = useState(null);
-  const [formData, setFormData] = useState({ quantity: '', min_stock: '' });
 
   const fetchStock = async () => {
     try {
