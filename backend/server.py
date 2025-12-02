@@ -1420,30 +1420,30 @@ async def get_stock_adjustments(
 @api_router.get("/stock/low", response_model=List[Dict[str, Any]])
 async def get_low_stock_products(current_user: User = Depends(get_current_user)):
     """
-    Get all products where quantity <= min_stock.
+    Get all products where stock_quantity <= minimum_stock.
     These products should be reordered soon.
     """
-    # Get all stock records
-    stock_items = await db.stock.find({}, {"_id": 0}).to_list(1000)
+    # Get all products
+    products = await db.products.find({}, {"_id": 0}).to_list(1000)
     
     low_stock = []
-    for item in stock_items:
+    for product in products:
+        current_stock = product.get('stock_quantity', 0)
+        min_stock = product.get('minimum_stock') or product.get('min_stock', 50)
+        
         # Check if quantity <= min_stock
-        if item['quantity'] <= item.get('min_stock', 80):
-            # Get product details
-            product = await db.products.find_one({"id": item['product_id']}, {"_id": 0})
-            if product:
-                low_stock.append({
-                    "product_id": item['product_id'],
-                    "product_name": product['name'],
-                    "product_sku": product['sku'],
-                    "current_quantity": item['quantity'],
-                    "min_stock": item.get('min_stock', 80),
-                    "deficit": item.get('min_stock', 80) - item['quantity'],
-                    "status": "critical" if item['quantity'] == 0 else "low",
-                    "product_cost": product.get('cost', 0),
-                    "product_price": product.get('price', 0)
-                })
+        if current_stock <= min_stock:
+            low_stock.append({
+                "product_id": product['id'],
+                "product_name": product['name'],
+                "product_sku": product['sku'],
+                "current_quantity": current_stock,
+                "min_stock": min_stock,
+                "deficit": min_stock - current_stock,
+                "status": "critical" if current_stock == 0 else "low",
+                "product_cost": product.get('cost_price') or product.get('cost', 0),
+                "product_price": product.get('sale_price') or product.get('price', 0)
+            })
     
     # Sort by deficit (most critical first)
     low_stock.sort(key=lambda x: x['deficit'], reverse=True)
