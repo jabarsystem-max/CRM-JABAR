@@ -11,6 +11,7 @@ import ProductDetail from './pages/ProductDetail';
 import EditProduct from './pages/EditProduct';
 import LowStockProducts from './pages/LowStockProducts';
 import Stock from './pages/Stock';
+import StockAdjustment from './pages/StockAdjustment';
 import NewOrder from './pages/NewOrder';
 import NewPurchase from './pages/NewPurchase';
 import ZenVitAI from './pages/ZenVitAI';
