@@ -1221,8 +1221,8 @@ async def get_stock(current_user: User = Depends(get_current_user)):
         if product:
             item['product_name'] = product['name']
             item['product_sku'] = product['sku']
-            item['product_cost'] = product['cost']
-            item['product_color'] = product.get('color')
+            item['product_cost'] = product.get('cost_price') or product.get('cost', 0)
+            item['product_color'] = product.get('color_hex') or product.get('color')
     
     return stock_items
 
