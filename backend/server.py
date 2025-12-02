@@ -1815,45 +1815,43 @@ async def update_order_status(order_id: str, status: str, current_user: User = D
         
         # Validate stock availability before reducing
         for line in lines:
-            stock = await db.stock.find_one({"product_id": line['product_id']}, {"_id": 0})
-            if not stock:
+            product = await db.products.find_one({"id": line['product_id']}, {"_id": 0})
+            if not product:
                 raise HTTPException(
                     status_code=400, 
-                    detail=f"No stock record found for product: {line['product_name']}"
+                    detail=f"Product not found: {line['product_name']}"
                 )
-            if stock['quantity'] < line['quantity']:
+            current_stock = product.get('stock_quantity', 0)
+            if current_stock < line['quantity']:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Insufficient stock for {line['product_name']}. Available: {stock['quantity']}, Required: {line['quantity']}"
+                    detail=f"Insufficient stock for {line['product_name']}. Available: {current_stock}, Required: {line['quantity']}"
                 )
         
         # Apply stock changes atomically
         for line in lines:
-            # Reduce stock quantity
-            new_quantity_result = await db.stock.find_one_and_update(
-                {"product_id": line['product_id']},
+            # Reduce Product.stock_quantity directly
+            new_quantity_result = await db.products.find_one_and_update(
+                {"id": line['product_id']},
                 {
-                    "$inc": {"quantity": -line['quantity']},
-                    "$set": {"last_updated": datetime.now(timezone.utc).isoformat()}
+                    "$inc": {"stock_quantity": -line['quantity']},
+                    "$set": {"updated_at": datetime.now(timezone.utc).isoformat()}
                 },
                 return_document=True,
                 projection={"_id": 0}
             )
             
             # Double-check quantity didn't go negative (safety check)
-            if new_quantity_result and new_quantity_result['quantity'] < 0:
+            if new_quantity_result and new_quantity_result.get('stock_quantity', 0) < 0:
                 # Rollback this change
-                await db.stock.update_one(
-                    {"product_id": line['product_id']},
-                    {"$inc": {"quantity": line['quantity']}}
+                await db.products.update_one(
+                    {"id": line['product_id']},
+                    {"$inc": {"stock_quantity": line['quantity']}}
                 )
                 raise HTTPException(
                     status_code=400,
                     detail=f"Stock went negative for {line['product_name']}. Transaction aborted."
                 )
-            
-            # Update stock status
-            await update_stock_status(line['product_id'])
             
             # Create StockMovement with new structure
             movement = {
