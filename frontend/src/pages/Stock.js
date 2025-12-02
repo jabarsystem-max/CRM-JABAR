@@ -63,9 +63,14 @@ const Stock = () => {
           <h1 className="page-title">📦 Lageroversikt</h1>
           <p className="page-subtitle">Administrer lagerbeholdning og lagergrenser</p>
         </div>
-        <button className="btn-primary" onClick={() => navigate('/stock-movements')}>
-          📊 Se bevegelser
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button className="btn-secondary" onClick={() => navigate('/stock-movements')}>
+            📊 Bevegelser
+          </button>
+          <button className="btn-primary" onClick={() => navigate('/stock/adjust')}>
+            ✏️ Juster lager
+          </button>
+        </div>
       </div>
 
       <div className="stats-row">
