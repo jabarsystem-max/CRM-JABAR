@@ -121,29 +121,9 @@ const Stock = () => {
                 </td>
                 <td>{item.product_sku}</td>
                 <td>
-                  {editItem === item.product_id ? (
-                    <input
-                      type="number"
-                      value={formData.quantity}
-                      onChange={e => setFormData({...formData, quantity: e.target.value})}
-                      className="inline-input"
-                    />
-                  ) : (
-                    item.quantity
-                  )}
+                  <strong>{item.quantity}</strong>
                 </td>
-                <td>
-                  {editItem === item.product_id ? (
-                    <input
-                      type="number"
-                      value={formData.min_stock}
-                      onChange={e => setFormData({...formData, min_stock: e.target.value})}
-                      className="inline-input"
-                    />
-                  ) : (
-                    item.min_stock
-                  )}
-                </td>
+                <td>{item.min_stock}</td>
                 <td>
                   <span className={`badge badge-${item.status === 'OK' ? 'success' : item.status === 'Low' ? 'warning' : 'danger'}`}>
                     {item.status}
