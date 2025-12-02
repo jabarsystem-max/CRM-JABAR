@@ -131,26 +131,12 @@ const Stock = () => {
                 </td>
                 <td>{Math.round(item.quantity * (item.product_cost || 0))} kr</td>
                 <td>
-                  {editItem === item.product_id ? (
-                    <div className="action-buttons">
-                      <button className="btn-small btn-primary" onClick={() => handleUpdate(item.product_id)}>
-                        Lagre
-                      </button>
-                      <button className="btn-small btn-secondary" onClick={() => setEditItem(null)}>
-                        Avbryt
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      className="btn-small btn-secondary"
-                      onClick={() => {
-                        setEditItem(item.product_id);
-                        setFormData({ quantity: item.quantity, min_stock: item.min_stock });
-                      }}
-                    >
-                      Juster
-                    </button>
-                  )}
+                  <button
+                    className="btn-small btn-secondary"
+                    onClick={() => navigate('/stock/adjust')}
+                  >
+                    Juster
+                  </button>
                 </td>
               </tr>
             ))}
