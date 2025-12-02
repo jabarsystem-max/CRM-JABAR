@@ -1349,6 +1349,145 @@ async def create_movement(movement_create: StockMovementCreate, current_user: Us
 
 
 # ============================================================================
+# STOCK ADJUSTMENT ROUTES
+# ============================================================================
+
+@api_router.post("/stock/adjust", response_model=Dict[str, Any], status_code=status.HTTP_201_CREATED)
+async def adjust_stock(adjustment: StockAdjustmentCreate, current_user: User = Depends(get_current_user)):
+    """
+    Manually adjust stock quantity (positive or negative).
+    Used for corrections, damages, losses, etc.
+    """
+    # Get current stock
+    stock = await db.stock.find_one({"product_id": adjustment.product_id}, {"_id": 0})
+    if not stock:
+        raise HTTPException(status_code=404, detail="Stock record not found for this product")
+    
+    # Calculate new quantity
+    new_quantity = stock['quantity'] + adjustment.change
+    
+    # Validate: quantity cannot go below 0
+    if new_quantity < 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot adjust stock. Would result in negative quantity ({new_quantity}). Current: {stock['quantity']}, Change: {adjustment.change}"
+        )
+    
+    # Create adjustment record
+    adjustment_record = {
+        "id": str(uuid.uuid4()),
+        "product_id": adjustment.product_id,
+        "change": adjustment.change,
+        "reason": adjustment.reason,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": current_user.get("email", "unknown")
+    }
+    await db.stock_adjustments.insert_one(adjustment_record)
+    
+    # Update stock quantity
+    await db.stock.update_one(
+        {"product_id": adjustment.product_id},
+        {
+            "$inc": {"quantity": adjustment.change},
+            "$set": {"last_updated": datetime.now(timezone.utc).isoformat()}
+        }
+    )
+    
+    # Update stock status
+    await update_stock_status(adjustment.product_id)
+    
+    # Create StockMovement
+    movement = {
+        "id": str(uuid.uuid4()),
+        "product_id": adjustment.product_id,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "type": "ADJUST",
+        "change": adjustment.change,
+        "source": "MANUAL",
+        "source_id": adjustment_record['id'],
+        "note": f"Lagerjustering: {adjustment.reason}"
+    }
+    await db.stock_movements.insert_one(movement)
+    
+    # Get updated stock
+    updated_stock = await db.stock.find_one({"product_id": adjustment.product_id}, {"_id": 0})
+    
+    # Get product info
+    product = await db.products.find_one({"id": adjustment.product_id}, {"_id": 0})
+    
+    return {
+        "message": "Stock adjusted successfully",
+        "adjustment_id": adjustment_record['id'],
+        "product_name": product.get('name', 'Unknown') if product else 'Unknown',
+        "previous_quantity": stock['quantity'],
+        "change": adjustment.change,
+        "new_quantity": updated_stock['quantity'],
+        "reason": adjustment.reason
+    }
+
+
+@api_router.get("/stock/adjustments", response_model=List[Dict[str, Any]])
+async def get_stock_adjustments(
+    product_id: Optional[str] = None,
+    limit: int = 100,
+    current_user: User = Depends(get_current_user)
+):
+    """Get stock adjustment history"""
+    query = {"product_id": product_id} if product_id else {}
+    adjustments = await db.stock_adjustments.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    for adj in adjustments:
+        if isinstance(adj.get('created_at'), str):
+            adj['created_at'] = datetime.fromisoformat(adj['created_at'])
+        
+        # Add product info
+        product = await db.products.find_one({"id": adj['product_id']}, {"_id": 0})
+        if product:
+            adj['product_name'] = product['name']
+            adj['product_sku'] = product['sku']
+    
+    return adjustments
+
+
+# ============================================================================
+# LOW STOCK ROUTES  
+# ============================================================================
+
+@api_router.get("/stock/low", response_model=List[Dict[str, Any]])
+async def get_low_stock_products(current_user: User = Depends(get_current_user)):
+    """
+    Get all products where quantity <= min_stock.
+    These products should be reordered soon.
+    """
+    # Get all stock records
+    stock_items = await db.stock.find({}, {"_id": 0}).to_list(1000)
+    
+    low_stock = []
+    for item in stock_items:
+        # Check if quantity <= min_stock
+        if item['quantity'] <= item.get('min_stock', 80):
+            # Get product details
+            product = await db.products.find_one({"id": item['product_id']}, {"_id": 0})
+            if product:
+                low_stock.append({
+                    "product_id": item['product_id'],
+                    "product_name": product['name'],
+                    "product_sku": product['sku'],
+                    "current_quantity": item['quantity'],
+                    "min_stock": item.get('min_stock', 80),
+                    "deficit": item.get('min_stock', 80) - item['quantity'],
+                    "status": "critical" if item['quantity'] == 0 else "low",
+                    "product_cost": product.get('cost', 0),
+                    "product_price": product.get('price', 0)
+                })
+    
+    # Sort by deficit (most critical first)
+    low_stock.sort(key=lambda x: x['deficit'], reverse=True)
+    
+    return low_stock
+
+
+# ============================================================================
 # SUPPLIER ROUTES
 # ============================================================================
 
