@@ -1334,7 +1334,7 @@ async def adjust_stock(adjustment: StockAdjustmentCreate, current_user: User = D
         "change": adjustment.change,
         "reason": adjustment.reason,
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "created_by": current_user.get("email", "unknown")
+        "created_by": current_user.email if hasattr(current_user, 'email') else "unknown"
     }
     await db.stock_adjustments.insert_one(adjustment_record)
     
