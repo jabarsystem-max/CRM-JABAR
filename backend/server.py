@@ -1723,16 +1723,110 @@ async def create_order(order_create: OrderCreate, current_user: User = Depends(g
 
 @api_router.put("/orders/{order_id}/status")
 async def update_order_status(order_id: str, status: str, current_user: User = Depends(get_current_user)):
-    result = await db.orders.update_one(
-        {"id": order_id},
-        {"$set": {"status": status}}
-    )
-    if result.matched_count == 0:
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
+    # CRITICAL: Handle COMPLETED status with stock reduction
+    if status == "COMPLETED" and not order.get('stock_applied', False):
+        # Get order lines
+        lines = await db.order_lines.find({"order_id": order_id}, {"_id": 0}).to_list(1000)
+        
+        if not lines:
+            raise HTTPException(status_code=400, detail="No items in order")
+        
+        # Validate stock availability before reducing
+        for line in lines:
+            stock = await db.stock.find_one({"product_id": line['product_id']}, {"_id": 0})
+            if not stock:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"No stock record found for product: {line['product_name']}"
+                )
+            if stock['quantity'] < line['quantity']:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Insufficient stock for {line['product_name']}. Available: {stock['quantity']}, Required: {line['quantity']}"
+                )
+        
+        # Apply stock changes atomically
+        for line in lines:
+            # Reduce stock quantity
+            new_quantity_result = await db.stock.find_one_and_update(
+                {"product_id": line['product_id']},
+                {
+                    "$inc": {"quantity": -line['quantity']},
+                    "$set": {"last_updated": datetime.now(timezone.utc).isoformat()}
+                },
+                return_document=True,
+                projection={"_id": 0}
+            )
+            
+            # Double-check quantity didn't go negative (safety check)
+            if new_quantity_result and new_quantity_result['quantity'] < 0:
+                # Rollback this change
+                await db.stock.update_one(
+                    {"product_id": line['product_id']},
+                    {"$inc": {"quantity": line['quantity']}}
+                )
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Stock went negative for {line['product_name']}. Transaction aborted."
+                )
+            
+            # Update stock status
+            await update_stock_status(line['product_id'])
+            
+            # Create StockMovement with new structure
+            movement = {
+                "id": str(uuid.uuid4()),
+                "product_id": line['product_id'],
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "type": "OUT",
+                "change": -line['quantity'],  # Negative number
+                "source": "ORDER",
+                "source_id": order_id,
+                "note": f"Salg til kunde: {order['customer_name']}"
+            }
+            await db.stock_movements.insert_one(movement)
+        
+        # Update customer statistics
+        customer = await db.customers.find_one({"id": order['customer_id']}, {"_id": 0})
+        if customer:
+            await db.customers.update_one(
+                {"id": order['customer_id']},
+                {
+                    "$inc": {
+                        "total_orders": 1,
+                        "total_spent": order.get('order_total', 0)
+                    },
+                    "$set": {
+                        "last_order_date": datetime.now(timezone.utc).isoformat()
+                    }
+                }
+            )
+        
+        # Update order with stock_applied flag
+        await db.orders.update_one(
+            {"id": order_id},
+            {
+                "$set": {
+                    "status": status,
+                    "stock_applied": True,
+                    "completed_at": datetime.now(timezone.utc).isoformat()
+                }
+            }
+        )
+    else:
+        # Normal status update (not COMPLETED or already applied)
+        await db.orders.update_one(
+            {"id": order_id},
+            {"$set": {"status": status}}
+        )
+    
     # If order is delivered, create follow-up task
-    if status == "Delivered":
-        order = await db.orders.find_one({"id": order_id})
+    if status == "Delivered" or status == "COMPLETED":
+        order = await db.orders.find_one({"id": order_id}, {"_id": 0})
         if order:
             due_date = datetime.now(timezone.utc) + timedelta(days=7)
             task = Task(
@@ -1750,7 +1844,7 @@ async def update_order_status(order_id: str, status: str, current_user: User = D
                 task_doc['due_date'] = task_doc['due_date'].isoformat()
             await db.tasks.insert_one(task_doc)
     
-    return {"message": "Order status updated"}
+    return {"message": "Order status updated", "stock_reduced": status == "COMPLETED"}
 
 
 # ============================================================================
