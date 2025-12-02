@@ -1574,31 +1574,14 @@ async def receive_purchase(purchase_id: str, current_user: User = Depends(get_cu
     
     # Apply stock changes atomically for all items
     for line in lines:
-        # Update stock quantity
-        stock = await db.stock.find_one({"product_id": line['product_id']}, {"_id": 0})
-        if not stock:
-            # Create stock entry if it doesn't exist
-            new_stock = {
-                "id": str(uuid.uuid4()),
-                "product_id": line['product_id'],
-                "quantity": line['quantity'],
-                "min_stock": 80,
-                "status": "OK",
-                "last_updated": datetime.now(timezone.utc).isoformat()
+        # Update Product.stock_quantity directly
+        await db.products.update_one(
+            {"id": line['product_id']},
+            {
+                "$inc": {"stock_quantity": line['quantity']},
+                "$set": {"updated_at": datetime.now(timezone.utc).isoformat()}
             }
-            await db.stock.insert_one(new_stock)
-        else:
-            # Increment existing stock
-            await db.stock.update_one(
-                {"product_id": line['product_id']},
-                {
-                    "$inc": {"quantity": line['quantity']},
-                    "$set": {"last_updated": datetime.now(timezone.utc).isoformat()}
-                }
-            )
-        
-        # Update stock status
-        await update_stock_status(line['product_id'])
+        )
         
         # Create StockMovement with new structure
         movement = {
