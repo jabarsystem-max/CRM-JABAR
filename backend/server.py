@@ -259,10 +259,12 @@ class Purchase(BaseModel):
     supplier_id: str
     supplier_name: str
     date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    status: str = "Ordered"  # Ordered, Received, Cancelled
+    status: str = "DRAFT"  # DRAFT, ORDERED, RECEIVED, CANCELLED
     total_amount: float = 0
     payment_status: str = "Unpaid"  # Unpaid, Partial, Paid
     notes: Optional[str] = None
+    stock_applied: bool = False  # Track if stock has been updated
+    received_at: Optional[datetime] = None  # When purchase was received
 
 class PurchaseCreate(BaseModel):
     supplier_id: str
