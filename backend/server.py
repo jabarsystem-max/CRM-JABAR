@@ -1464,30 +1464,80 @@ async def receive_purchase(purchase_id: str, current_user: User = Depends(get_cu
     if not purchase:
         raise HTTPException(status_code=404, detail="Purchase not found")
     
+    # CRITICAL: Check if stock has already been applied
+    if purchase.get('stock_applied', False):
+        raise HTTPException(
+            status_code=400, 
+            detail="Stock has already been applied for this purchase. Cannot receive twice."
+        )
+    
     # Get purchase lines
     lines = await db.purchase_lines.find({"purchase_id": purchase_id}, {"_id": 0}).to_list(1000)
     
-    # Update stock for all items
+    if not lines:
+        raise HTTPException(status_code=400, detail="No items in purchase")
+    
+    # Apply stock changes atomically for all items
     for line in lines:
-        await db.stock.update_one(
-            {"product_id": line['product_id']},
-            {"$inc": {"quantity": line['quantity']}}
-        )
+        # Update stock quantity
+        stock = await db.stock.find_one({"product_id": line['product_id']}, {"_id": 0})
+        if not stock:
+            # Create stock entry if it doesn't exist
+            new_stock = {
+                "id": str(uuid.uuid4()),
+                "product_id": line['product_id'],
+                "quantity": line['quantity'],
+                "min_stock": 80,
+                "status": "OK",
+                "last_updated": datetime.now(timezone.utc).isoformat()
+            }
+            await db.stock.insert_one(new_stock)
+        else:
+            # Increment existing stock
+            await db.stock.update_one(
+                {"product_id": line['product_id']},
+                {
+                    "$inc": {"quantity": line['quantity']},
+                    "$set": {"last_updated": datetime.now(timezone.utc).isoformat()}
+                }
+            )
+        
+        # Update stock status
         await update_stock_status(line['product_id'])
-        await create_stock_movement(line['product_id'], "IN", line['quantity'], purchase_id=purchase_id, note="Purchase received")
+        
+        # Create StockMovement with new structure
+        movement = {
+            "id": str(uuid.uuid4()),
+            "product_id": line['product_id'],
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "type": "IN",
+            "change": line['quantity'],  # Positive number
+            "source": "PURCHASE",
+            "source_id": purchase_id,
+            "note": f"Innkjøp mottatt: {line['product_name']}"
+        }
+        await db.stock_movements.insert_one(movement)
         
         # AUTOMATION: Complete stock tasks when replenished
         await auto_complete_task_on_stock_replenishment(line['product_id'])
     
-    # Update purchase status
+    # Update purchase status and mark stock as applied
     await db.purchases.update_one(
         {"id": purchase_id},
-        {"$set": {"status": "Received"}}
+        {
+            "$set": {
+                "status": "RECEIVED",
+                "stock_applied": True,
+                "received_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
     )
     
     updated = await db.purchases.find_one({"id": purchase_id}, {"_id": 0})
     if isinstance(updated.get('date'), str):
         updated['date'] = datetime.fromisoformat(updated['date'])
+    if updated.get('received_at') and isinstance(updated['received_at'], str):
+        updated['received_at'] = datetime.fromisoformat(updated['received_at'])
     
     updated['lines'] = lines
     return updated
