@@ -273,6 +273,15 @@ const Products = () => {
                     e.target.src = `${process.env.REACT_APP_BACKEND_URL}/uploads/products/placeholder.png`;
                   }}
                 />
+                {/* Low Stock Warning Badge */}
+                {stockStatus === 'critical' || stockStatus === 'low' ? (
+                  <div className="low-stock-badge">
+                    <span className="warning-icon">⚠️</span>
+                    <span className="warning-text">
+                      {stockStatus === 'critical' ? 'Tom' : 'Lavt'}
+                    </span>
+                  </div>
+                ) : null}
               </div>
               
               {/* Product Info */}
