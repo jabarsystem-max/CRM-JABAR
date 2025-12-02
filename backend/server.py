@@ -199,12 +199,18 @@ class StockMovement(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     product_id: str
-    date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    type: str  # IN or OUT
-    quantity: int
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    type: str  # "IN", "OUT", "ADJUST"
+    change: int  # Positive or negative integer
+    source: str  # "PURCHASE", "ORDER", "MANUAL"
+    source_id: Optional[str] = None  # ID of purchase/order/adjustment
+    note: Optional[str] = None
+    
+    # Legacy fields for backward compatibility
+    date: Optional[datetime] = None
+    quantity: Optional[int] = None
     order_id: Optional[str] = None
     purchase_id: Optional[str] = None
-    note: Optional[str] = None
 
 class StockMovementCreate(BaseModel):
     product_id: str
