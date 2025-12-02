@@ -342,7 +342,7 @@ class Order(BaseModel):
     customer_name: str
     date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     channel: str = "Direct"  # Shopify, TikTok, Instagram, Direct, Campaign
-    status: str = "New"  # New, Processing, Packed, Shipped, Delivered, Cancelled, Refund
+    status: str = "NEW"  # DRAFT, NEW, PAID, SHIPPED, COMPLETED, CANCELLED
     shipping_paid_by_customer: float = 0
     shipping_cost: float = 0
     payment_status: str = "Unpaid"  # Unpaid, Partial, Paid
@@ -353,6 +353,8 @@ class Order(BaseModel):
     cost_total: float = 0  # AUTO
     profit: float = 0  # AUTO
     profit_percent: float = 0  # AUTO
+    stock_applied: bool = False  # Track if stock has been reduced
+    completed_at: Optional[datetime] = None  # When order was completed
 
 class OrderCreate(BaseModel):
     customer_id: str
