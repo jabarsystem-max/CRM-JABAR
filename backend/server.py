@@ -1211,18 +1211,30 @@ async def upload_image(file: UploadFile = File(...), current_user: User = Depend
 
 @api_router.get("/stock", response_model=List[Dict[str, Any]])
 async def get_stock(current_user: User = Depends(get_current_user)):
-    stock_items = await db.stock.find({}, {"_id": 0}).to_list(1000)
+    """
+    Get stock overview from Product.stock_quantity
+    (Stock table is now INACTIVE - Product is the single source of truth)
+    """
+    products = await db.products.find({}, {"_id": 0}).to_list(1000)
     
-    for item in stock_items:
-        if isinstance(item.get('last_updated'), str):
-            item['last_updated'] = datetime.fromisoformat(item['last_updated'])
+    stock_items = []
+    for product in products:
+        stock_item = {
+            "product_id": product['id'],
+            "product_name": product['name'],
+            "product_sku": product['sku'],
+            "product_cost": product.get('cost_price') or product.get('cost', 0),
+            "product_color": product.get('color_hex') or product.get('color'),
+            "quantity": product.get('stock_quantity', 0),
+            "min_stock": product.get('minimum_stock') or product.get('min_stock', 50),
+            "status": "OK" if product.get('stock_quantity', 0) > product.get('minimum_stock', 50) else "Low" if product.get('stock_quantity', 0) > 0 else "Out",
+            "last_updated": product.get('updated_at', datetime.now(timezone.utc).isoformat())
+        }
         
-        product = await db.products.find_one({"id": item['product_id']}, {"_id": 0})
-        if product:
-            item['product_name'] = product['name']
-            item['product_sku'] = product['sku']
-            item['product_cost'] = product.get('cost_price') or product.get('cost', 0)
-            item['product_color'] = product.get('color_hex') or product.get('color')
+        if isinstance(stock_item.get('last_updated'), str):
+            stock_item['last_updated'] = datetime.fromisoformat(stock_item['last_updated'])
+        
+        stock_items.append(stock_item)
     
     return stock_items
 
