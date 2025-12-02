@@ -1314,19 +1314,21 @@ async def adjust_stock(adjustment: StockAdjustmentCreate, current_user: User = D
     Manually adjust stock quantity (positive or negative).
     Used for corrections, damages, losses, etc.
     """
-    # Get current stock
-    stock = await db.stock.find_one({"product_id": adjustment.product_id}, {"_id": 0})
-    if not stock:
-        raise HTTPException(status_code=404, detail="Stock record not found for this product")
+    # Get current product
+    product = await db.products.find_one({"id": adjustment.product_id}, {"_id": 0})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    current_stock = product.get('stock_quantity', 0)
     
     # Calculate new quantity
-    new_quantity = stock['quantity'] + adjustment.change
+    new_quantity = current_stock + adjustment.change
     
     # Validate: quantity cannot go below 0
     if new_quantity < 0:
         raise HTTPException(
             status_code=400,
-            detail=f"Cannot adjust stock. Would result in negative quantity ({new_quantity}). Current: {stock['quantity']}, Change: {adjustment.change}"
+            detail=f"Cannot adjust stock. Would result in negative quantity ({new_quantity}). Current: {current_stock}, Change: {adjustment.change}"
         )
     
     # Create adjustment record
@@ -1340,17 +1342,14 @@ async def adjust_stock(adjustment: StockAdjustmentCreate, current_user: User = D
     }
     await db.stock_adjustments.insert_one(adjustment_record)
     
-    # Update stock quantity
-    await db.stock.update_one(
-        {"product_id": adjustment.product_id},
+    # Update Product.stock_quantity directly
+    await db.products.update_one(
+        {"id": adjustment.product_id},
         {
-            "$inc": {"quantity": adjustment.change},
-            "$set": {"last_updated": datetime.now(timezone.utc).isoformat()}
+            "$inc": {"stock_quantity": adjustment.change},
+            "$set": {"updated_at": datetime.now(timezone.utc).isoformat()}
         }
     )
-    
-    # Update stock status
-    await update_stock_status(adjustment.product_id)
     
     # Create StockMovement
     movement = {
