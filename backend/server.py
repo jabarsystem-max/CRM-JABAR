@@ -1364,19 +1364,16 @@ async def adjust_stock(adjustment: StockAdjustmentCreate, current_user: User = D
     }
     await db.stock_movements.insert_one(movement)
     
-    # Get updated stock
-    updated_stock = await db.stock.find_one({"product_id": adjustment.product_id}, {"_id": 0})
-    
-    # Get product info
-    product = await db.products.find_one({"id": adjustment.product_id}, {"_id": 0})
+    # Get updated product
+    updated_product = await db.products.find_one({"id": adjustment.product_id}, {"_id": 0})
     
     return {
         "message": "Stock adjusted successfully",
         "adjustment_id": adjustment_record['id'],
-        "product_name": product.get('name', 'Unknown') if product else 'Unknown',
-        "previous_quantity": stock['quantity'],
+        "product_name": product.get('name', 'Unknown'),
+        "previous_quantity": current_stock,
         "change": adjustment.change,
-        "new_quantity": updated_stock['quantity'],
+        "new_quantity": updated_product.get('stock_quantity', 0),
         "reason": adjustment.reason
     }
 
