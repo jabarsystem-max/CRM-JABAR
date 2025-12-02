@@ -242,16 +242,16 @@ const Products = () => {
 
       <div className="product-grid">
         {products.map(product => {
-          // Calculate stock status and color
-          const currentStock = product.current_stock || 0;
-          const minStock = product.min_stock || 0;
+          // Calculate stock status and color (using new fields)
+          const currentStock = product.stock_quantity || 0;
+          const minStock = product.minimum_stock || 50;
           let stockStatus = 'normal';
           let stockColor = '#10b981'; // green
           
           if (currentStock === 0) {
             stockStatus = 'critical';
             stockColor = '#dc2626'; // red
-          } else if (currentStock <= minStock) {
+          } else if (currentStock < minStock) {
             stockStatus = 'low';
             stockColor = '#f59e0b'; // yellow/orange
           }
@@ -262,17 +262,25 @@ const Products = () => {
               className="product-card-modern" 
               onClick={() => navigate(`/products/${product.id}`)}
             >
-              {/* Product Image */}
-              <div className="product-image-container">
-                <img 
-                  src={`${process.env.REACT_APP_BACKEND_URL}${product.image_url || '/uploads/products/placeholder.png'}`} 
-                  alt={product.name}
-                  className="product-image"
-                  loading="lazy"
-                  onError={(e) => {
-                    e.target.src = `${process.env.REACT_APP_BACKEND_URL}/uploads/products/placeholder.png`;
-                  }}
-                />
+              {/* Product Icon with Color */}
+              <div 
+                className="product-icon-container"
+                style={{ backgroundColor: product.color_hex || '#E5E7EB' }}
+              >
+                {product.icon_url ? (
+                  <img 
+                    src={product.icon_url} 
+                    alt={product.name}
+                    className="product-icon"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.target.src = '/icons/default-box.png';
+                    }}
+                  />
+                ) : (
+                  <span className="product-icon-placeholder">📦</span>
+                )}
+                
                 {/* Low Stock Warning Badge */}
                 {stockStatus === 'critical' || stockStatus === 'low' ? (
                   <div className="low-stock-badge">
@@ -294,7 +302,7 @@ const Products = () => {
                 
                 {/* Price */}
                 <div className="product-price">
-                  <span className="price-amount">{product.price} kr</span>
+                  <span className="price-amount">{product.sale_price || product.price} kr</span>
                 </div>
                 
                 {/* Stock Status */}
@@ -304,8 +312,8 @@ const Products = () => {
                     style={{ backgroundColor: stockColor }}
                   ></span>
                   <span className="stock-text">
-                    {currentStock === 0 ? 'Utsolgt' : 
-                     currentStock <= minStock ? `Lav (${currentStock} stk)` : 
+                    {currentStock === 0 ? 'Tomt på lager' : 
+                     currentStock < minStock ? `På lager (${currentStock} stk)` : 
                      `På lager (${currentStock} stk)`}
                   </span>
                 </div>
