@@ -221,6 +221,22 @@ class StockMovementCreate(BaseModel):
     note: Optional[str] = None
 
 
+# --- Stock Adjustment Models ---
+class StockAdjustment(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    product_id: str
+    change: int  # Positive or negative
+    reason: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by: Optional[str] = None
+
+class StockAdjustmentCreate(BaseModel):
+    product_id: str
+    change: int
+    reason: str
+
+
 # --- Supplier Models ---
 class Supplier(BaseModel):
     model_config = ConfigDict(extra="ignore")
