@@ -650,8 +650,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Stock Management System Testing - COMPLETED SUCCESSFULLY"
-  stuck_tasks: []
+    - "ZENVIT Product Implementation - CRITICAL STOCK INTEGRATION ISSUES"
+  stuck_tasks: 
+    - "ZENVIT Product Implementation with New Model"
   test_all: false
   test_priority: "high_first"
 
