@@ -2782,7 +2782,7 @@ Gi anbefalinger basert på beskrivelsen."""
         user_message = UserMessage(text=user_prompt)
         ai_response = await chat.send_message(user_message)
         
-        ai_response = response.choices[0].message.content
+        # ai_response is already the text content from emergentintegrations
         
         # Parse JSON response
         try:
