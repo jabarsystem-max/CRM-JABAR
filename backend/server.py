@@ -2768,17 +2768,17 @@ TILGJENGELIGE ZENVIT-PRODUKTER:
 
 Gi anbefalinger basert på beskrivelsen."""
 
-        # Call OpenAI API with Emergent key
+        # Call OpenAI API via Emergent
         import openai
         
-        # Use Emergent LLM key
+        # Use Emergent LLM key with Emergent API endpoint
         client = openai.OpenAI(
             api_key="sk-emergent-bDeF7E1Fc202d02EdC2A8AB33Bdd17Fe5eFADD66B5f7B5BD",
-            base_url="https://api.openai.com/v1"  # Use standard OpenAI endpoint
+            base_url="https://api.emergent.sh/openai/v1"  # Emergent OpenAI proxy
         )
         
         response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Use standard OpenAI model
+            model="gpt-4o-mini",  # Model available via Emergent
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
