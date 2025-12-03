@@ -290,7 +290,7 @@ const NewOrder = () => {
                   <div className="order-item-total">
                     <label className="form-label-small">Total</label>
                     <div className="item-total-value">
-                      {(item.quantity * item.price).toFixed(2)} kr
+                      {((parseInt(item.quantity) || 0) * (parseFloat(item.price) || 0)).toFixed(2)} kr
                     </div>
                   </div>
 
