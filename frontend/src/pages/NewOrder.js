@@ -256,7 +256,7 @@ const NewOrder = () => {
                       <option value="">Velg produkt</option>
                       {products.map(product => (
                         <option key={product.id} value={product.id}>
-                          {product.name} - {product.price} kr
+                          {product.name} - {product.sale_price || product.price || 0} kr
                         </option>
                       ))}
                     </select>
