@@ -1737,11 +1737,15 @@ async def create_order(order_create: OrderCreate, current_user: User = Depends(g
             raise HTTPException(status_code=404, detail=f"Product {item_data['product_id']} not found")
         
         quantity = item_data['quantity']
-        sale_price = item_data.get('sale_price', product['price'])
+        # Use item price if provided, otherwise use product's sale_price or price
+        sale_price = item_data.get('price') or item_data.get('sale_price') or product.get('sale_price') or product.get('price', 0)
         discount = item_data.get('discount', 0)
         
+        # Get product cost
+        cost_price = product.get('cost_price') or product.get('cost', 0)
+        
         line_total = (sale_price * quantity) - discount
-        line_profit = line_total - (product['cost'] * quantity)
+        line_profit = line_total - (cost_price * quantity)
         
         line = OrderLine(
             order_id=order.id,
