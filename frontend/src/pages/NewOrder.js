@@ -103,9 +103,22 @@ const NewOrder = () => {
       return;
     }
 
-    const validItems = orderItems.filter(item => item.product_id && item.quantity > 0);
+    const validItems = orderItems
+      .filter(item => item.product_id && item.quantity > 0)
+      .map(item => ({
+        ...item,
+        quantity: parseInt(item.quantity) || 1,
+        price: parseFloat(item.price) || 0
+      }));
+    
     if (validItems.length === 0) {
       setError('Legg til minst ett produkt');
+      return;
+    }
+    
+    const totalPrice = calculateTotal();
+    if (totalPrice <= 0) {
+      setError('Totalpris må være større enn 0. Sjekk at produktene har pris.');
       return;
     }
 
@@ -113,7 +126,7 @@ const NewOrder = () => {
       const orderData = {
         ...formData,
         items: validItems,
-        order_total: calculateTotal(),
+        order_total: totalPrice,
         date: new Date().toISOString()
       };
 
