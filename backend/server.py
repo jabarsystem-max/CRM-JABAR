@@ -534,16 +534,23 @@ async def update_stock_status(product_id: str):
 async def create_stock_movement(product_id: str, type: str, quantity: int, 
                                 order_id: str = None, purchase_id: str = None, note: str = None):
     """Create a stock movement record"""
+    # Use new StockMovement model structure
     movement = StockMovement(
         product_id=product_id,
         type=type,
+        change=quantity,  # New field name
+        source="ORDER" if order_id else "PURCHASE" if purchase_id else "MANUAL",
+        source_id=order_id or purchase_id,
+        note=note,
+        # Legacy fields for backward compatibility
         quantity=quantity,
         order_id=order_id,
-        purchase_id=purchase_id,
-        note=note
+        purchase_id=purchase_id
     )
     doc = movement.model_dump()
-    doc['date'] = doc['date'].isoformat()
+    doc['timestamp'] = doc['timestamp'].isoformat()
+    if doc.get('date'):
+        doc['date'] = doc['date'].isoformat()
     await db.stock_movements.insert_one(doc)
 
 async def update_customer_stats(customer_id: str):
