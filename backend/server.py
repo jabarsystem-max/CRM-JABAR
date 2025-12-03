@@ -1761,7 +1761,7 @@ async def create_order(order_create: OrderCreate, current_user: User = Depends(g
         lines.append(line.model_dump())
         
         order_total += line_total
-        cost_total += product['cost'] * quantity
+        cost_total += cost_price * quantity
         
         # Update stock
         await db.stock.update_one(
