@@ -87,7 +87,9 @@ const NewOrder = () => {
 
   const calculateTotal = () => {
     return orderItems.reduce((total, item) => {
-      return total + (item.quantity * item.price);
+      const quantity = parseInt(item.quantity) || 0;
+      const price = parseFloat(item.price) || 0;
+      return total + (quantity * price);
     }, 0);
   };
 
