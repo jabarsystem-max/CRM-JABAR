@@ -71,8 +71,15 @@ const NewOrder = () => {
     if (field === 'product_id' && value) {
       const product = products.find(p => p.id === value);
       if (product) {
-        newItems[index].price = product.price;
+        // Use sale_price (new model) or fallback to price (legacy)
+        const productPrice = product.sale_price || product.price || 0;
+        newItems[index].price = parseFloat(productPrice);
       }
+    }
+    
+    // Ensure quantity is a number
+    if (field === 'quantity') {
+      newItems[index].quantity = parseInt(value) || 1;
     }
     
     setOrderItems(newItems);
