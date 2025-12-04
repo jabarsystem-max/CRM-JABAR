@@ -2771,12 +2771,9 @@ Gi anbefalinger basert på beskrivelsen."""
         # Call OpenAI via Emergent LLM integration
         from emergentintegrations.llm.chat import LlmChat, UserMessage
         
-        # Get Emergent LLM key from environment
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY', 'sk-emergent-bDeF7E1Fc202d02EdC2A8AB33Bdd17Fe5eFADD66B5f7B5BD')
-        
-        # Initialize chat with Emergent LLM key
+        # LiteLLM reads OPENAI_API_KEY from environment automatically
+        # Initialize chat without explicit api_key (uses env var)
         chat = LlmChat(
-            api_key=emergent_key,
             session_id=f"ai-recommendation-{datetime.now(timezone.utc).timestamp()}",
             system_message=system_prompt
         ).with_model("openai", "gpt-4o-mini")
