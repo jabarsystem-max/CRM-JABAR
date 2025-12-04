@@ -2771,9 +2771,14 @@ Gi anbefalinger basert på beskrivelsen."""
         # Call OpenAI via Emergent LLM integration
         from emergentintegrations.llm.chat import LlmChat, UserMessage
         
-        # LiteLLM reads OPENAI_API_KEY from environment automatically
-        # Initialize chat without explicit api_key (uses env var)
+        # Get API key from environment (OPENAI_API_KEY is used by LiteLLM)
+        api_key = os.environ.get('OPENAI_API_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
+        
+        # Initialize chat with API key
         chat = LlmChat(
+            api_key=api_key,
             session_id=f"ai-recommendation-{datetime.now(timezone.utc).timestamp()}",
             system_message=system_prompt
         ).with_model("openai", "gpt-4o-mini")
